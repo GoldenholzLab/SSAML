@@ -262,8 +262,7 @@ def plotZING(prefixN,numLIST,survivalTF):
       bigD = dat
     else:
       bigD = bigD.append(dat,ignore_index=True)
-  # this is a hard coded fix:
-  bigD = bigD[bigD['N']>100]
+  
 
   fig, (ax1, ax2, ax3) = plt.subplots(3,1)
   plt.subplot(3,1,1)
