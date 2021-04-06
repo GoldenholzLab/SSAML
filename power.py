@@ -272,7 +272,7 @@ def plotZING(prefixN,numLIST,survivalTF):
   ax2 = sns.boxplot(x="N", y=useme, data=bigD)
   plt.subplot(3,1,3)
   ax3 = sns.boxplot(x="N", y="CIL",data=bigD)
-  fig.savefig('Zplot.jpg')
+  fig.savefig('Zplot.jpg',dpi=300)
   return
 
 
