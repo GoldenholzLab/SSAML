@@ -232,7 +232,7 @@ def showSummary(rwd,bias,covp,numLIST,oldALL,survivalTF):
   B.columns = ['howmany','confint','BIAS slope','BIAS ' + useme,'BIAS CIL']
   B.drop(['howmany','confint'],axis=1)
   C.columns = ['howmany','confint','COVP slope','COVP ' + useme,'COVP CIL']
-  C.drop(['howmany','confint',axis=1)
+  C.drop(['howmany','confint'],axis=1)
   ALL = pd.concat([R,B,C],axis=1)
   ALL.index = numLIST
 
@@ -278,6 +278,7 @@ def plotZING(prefixN,numLIST,survivalTF):
 # MAIN
 # prepare big file
 T1= time.time()
+import pdb;pdb.set_trace()
 os.chdir(mydir)
 c = pd.read_csv(big_file,sep=',')
 uids = np.array(range(c.shape[0]))

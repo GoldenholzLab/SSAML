@@ -1,3 +1,4 @@
+from collections import defaultdict
 from itertools import product
 import os
 import numpy as np
@@ -28,7 +29,9 @@ reg_noises = [0.1, 1, 10]            # variance of gaussian noise added
 
 
 # generate simulated datasets
+df_cls = defaultdict(list)
 for random_seed, Nfeat, class_ratio, flip_y in product(random_seeds, Nfeats, class_ratios, flip_ys):
+    print(random_seed, Nfeat, class_ratio, flip_y)
     cw = np.array([1, class_ratio])
     X, y = make_classification(
         n_samples=N, n_features=Nfeat,
@@ -39,15 +42,37 @@ for random_seed, Nfeat, class_ratio, flip_y in product(random_seeds, Nfeats, cla
         weights=cw/cw.sum(),
         flip_y=flip_y,
         random_state=random_seed)
+    
+    # add some monotonic nonlinearity
+    X[:,:Nfeat//3] = X[:,:Nfeat//3]**3/10
+    X[:,Nfeat//3:Nfeat//3*2] = 10*np.sign(X[:,Nfeat//3:Nfeat//3*2])*np.log1p(np.abs(X[:,Nfeat//3:Nfeat//3*2]))
+    X[:,Nfeat//3*2:] = np.exp(X[:,Nfeat//3*2:])
+    
     #X[:, :round(X.shape[1]*binary_ratio)] = (X[:, :round(X.shape[1]*binary_ratio)]>0).astype(int) # make binary
+    std = X.std(axis=0)
+    std[std<0.001] = 1
+    X = X/std*5
+    
     df = pd.DataFrame(
         data=np.c_[X, y],
-        columns=[f'x{i+1}' for i in range(X.shape[1])]+['y']
+        columns=[f'x{i+1}' for i in range(X.shape[1])]+['event']
         )
-    df.to_csv(os.path.join(simulation_data_dir, f'simulated_dataset_classfication_Nfeat{Nfeat}_classratio{class_ratio}_flipy{flip_y}_randomseed{random_seed}.csv'), index=False, float_format='%.1f')
+    save_path = os.path.join(simulation_data_dir, f'simulated_dataset_classfication_Nfeat{Nfeat}_classratio{class_ratio}_flipy{flip_y}_randomseed{random_seed}.csv')
+    df.to_csv(save_path, index=False, float_format='%.1f')
+    df_cls['RandomSeed'].append(random_seed)
+    df_cls['Nfeat'].append(Nfeat)
+    df_cls['ClassRatio'].append(class_ratio)
+    df_cls['FlipYProb'].append(flip_y)
+    df_cls['Path'].append(save_path)
 
+df_cls = pd.DataFrame(data=df_cls)
+df_cls.to_csv(os.path.join(simulation_data_dir, 'simulator_classification_dataset_list.csv'), index=False)
     
+    
+"""
+df_reg = defaultdict(list)
 for random_seed, Nfeat, effective_rank_perc, reg_noise in product(random_seeds, Nfeats, effective_rank_percs, reg_noises):
+    print(random_seed, Nfeat, effective_rank_perc, reg_noise)
     X, y, coef = make_regression(
         n_samples=N, n_features=Nfeat,
         n_informative=round(Nfeat*feat_perc_informative),
@@ -56,11 +81,26 @@ for random_seed, Nfeat, effective_rank_perc, reg_noise in product(random_seeds, 
         tail_strength=0.5,
         noise=reg_noise,
         random_state=random_seed)
-    X = X/np.mean(np.abs(X))*5  # sometimes magnitude of X is every small, make sure mean mag is 5
+    
     #X[:, :round(X.shape[1]*binary_ratio)] = (X[:, :round(X.shape[1]*binary_ratio)]>0).astype(int) # make binary
+    X = X/X.std(axis=0)*5
+    
+    # add some monotonic nonlinearity
+    X[:,:Nfeat//3] = X[:,:Nfeat//3]**3+1
+    X[:,Nfeat//3:Nfeat//3*2] = 10*np.sign(X[:,Nfeat//3:Nfeat//3*2])*np.log1p(np.abs(X[:,Nfeat//3:Nfeat//3*2]))
+    X[:,Nfeat//3*2:] = np.exp(X[:,Nfeat//3*2:])/10
+    
     df = pd.DataFrame(
         data=np.c_[X, y],
-        columns=[f'x{i+1}' for i in range(X.shape[1])]+['y']
+        columns=[f'x{i+1}' for i in range(X.shape[1])]+['event']
         )
-    df.to_csv(os.path.join(simulation_data_dir, f'simulated_dataset_regression_Nfeat{Nfeat}_effectiverank{effective_rank_perc}_noise{reg_noise}_randomseed{random_seed}.csv'), index=False, float_format='%.1f')
+    save_path = os.path.join(simulation_data_dir, f'simulated_dataset_regression_Nfeat{Nfeat}_effectiverank{effective_rank_perc}_noise{reg_noise}_randomseed{random_seed}.csv')
+    df.to_csv(save_path, index=False, float_format='%.1f')
+    df_reg['RandomSeed'].append(random_seed)
+    df_reg['Nfeat'].append(Nfeat)
+    df_reg['EffectiveRankPerc'].append(effective_rank_perc)
+    df_reg['RegNoise'].append(flip_y)
+    df_reg['Path'].append(save_path)
+df_reg.to_csv(os.path.join(simulation_data_dir, 'simulator_regression_dataset_list.csv'))
+"""
 
