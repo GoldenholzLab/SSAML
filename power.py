@@ -20,6 +20,7 @@
 
 # First load up the libraries needed
 # this for drawing headless
+from collections import Counter
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -79,8 +80,15 @@ def runOneSet(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint
     for boots in range(bootReps):
       boot_subs = makeSubGroup(sub_uids,N,withReplacement,peopleTF)
       myBoot= uids[sub_uids[boot_subs]]
-      mask = c['ID'].isin(myBoot)
-      c_subset = c.loc[mask]
+      #mask = c['ID'].isin(myBoot)
+      #c_subset = c.loc[mask]
+      
+      myBoot_counter = Counter(myBoot)
+      idx = []
+      for x, count in myBoot_counter.items():
+        idx.extend(np.repeat( np.where(c['ID']==x)[0][0], count ))
+      c_subset = c.iloc[idx].reset_index(drop=True)
+      
       resultX[boots,:] = calcX(c_subset,c,survivalTF)
     
     with open(fn, 'a') as f:
@@ -128,8 +136,8 @@ def calcX(c_subset,c,survivalTF):
 
     X = [slope,c_index,CIL]
   else:
-    y=c_subset['event']
-    pred=c_subset['p']
+    y = c_subset['event']
+    pred = c_subset['p']
 
     # GET SLOPE
     # given true y and predicted, calculate slope and bias of calibration curve
