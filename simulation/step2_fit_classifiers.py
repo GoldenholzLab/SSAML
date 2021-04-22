@@ -67,7 +67,7 @@ def fit_model(X, y, Ncv, model_type='logreg', best_params=None, n_jobs=1, random
             model = LogisticRegression(
                 penalty='elasticnet', class_weight='balanced',
                 random_state=random_state, solver='saga',
-                max_iter=10000, n_jobs=n_jobs)
+                max_iter=2000, n_jobs=n_jobs)
             model_params  = {'C':[0.1,1,10], 'l1_ratio':np.arange(0.2,1,0.2)}
         elif model_type=='rf':
             model = RandomForestClassifier(
@@ -142,7 +142,7 @@ if __name__=='__main__':
     simulation_data_dir = 'datasets'
     df = pd.read_csv(os.path.join(simulation_data_dir, 'simulator_classification_dataset_list.csv'))
     Ns = [100,1000,10000]
-    model_types = ['logreg', 'rf']
+    model_types = ['logreg']#, 'rf']
     random_state = 2021
     n_jobs = 8
     Ncv = 5
@@ -162,7 +162,12 @@ if __name__=='__main__':
             
             for model_type in model_types:
                 print(model_type)
-                cv_scores_tr, cv_scores_te, params, models, Xtes, ytes, yptes, yp = fit_model(X, y, Ncv, model_type=model_type, n_jobs=n_jobs, random_state=random_state)
+                try:
+                    cv_scores_tr, cv_scores_te, params, models, Xtes, ytes, yptes, yp =\
+                            fit_model(X, y, Ncv, model_type=model_type, n_jobs=n_jobs, random_state=random_state)
+                except Exception as ee:
+                    print(n, model_type, df.Path.iloc[i])
+                    continue
                 model = models[-1]
                 yp = yp[:,1]  #TODO now assumes binary
                 
