@@ -1,13 +1,10 @@
 #!/bin/bash
 
 # constants
-peopleTF=1
 maxPts=1613
-survivalTF=0
 infile=/myfiles/inputDataFile.csv
 outdir=/myfiles/dir_for_outputs
-
-# submit 100 iters
+dataTYPE=0
 runMode=$1
 
 #runMode=0
@@ -24,7 +21,7 @@ case $runMode in
             for maxPts in $maxlist; do
                 #for iterNumber in $ilist; do
                 runMode=1
-                python power.py $runMode $peopleTF $iterNumber $maxPts $confint $survivalTF $infile $outdir
+                python power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
                 #done
                 maxP=`printf "%04d" $maxPts`
                 FILE=num${maxP}_${confint}.csv

@@ -5,18 +5,20 @@
 # Daniel Goldenholz, MD, PhD
 
 # USAGE:
-#power.py <runMode> <peopleTF> <iterNumber> <maxPts> <confint> <survivalTF> <infile> <outdir>
+#power.py <runMode> <dataTYPE> <iterNumber> <maxPts> <confint> <infile> <outdir> <peopleTF> <survivalTF>
 # runMode - the mode we are running
 #  = 1 iterate
 #  = 2 summarize the local iterations
 #  = 3 global summary
-# peopleTF -- 1 means you want people. 0 means you want EVENTS.
+# dataTYPE = 0 for ST type database. 1 for COVA, 2 for BAI, 3 for anything else.
+#      note: 0,1 and 2 will override the peopleTF and survivalTF options.
 # iterNumber - the iteration number to run (between 0 and 9999)
 # maxPts - how many patients are available in total
 # confint - the confidence interval to compute (eg 0.995, .997 etc)
-# survivalTF - 0 if no survival stats, 1 if survival based stats
 # infile - full path of the input data file
 # outdir - full path of the output data directory
+# peopleTF -- 1 means you want people. 0 means you want EVENTS.
+# survivalTF - 0 if no survival stats, 1 if survival based stats
 
 # First load up the libraries needed
 # this for drawing headless
@@ -37,19 +39,30 @@ from sklearn.metrics import brier_score_loss
 from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 from lifelines import KaplanMeierFitter,CoxPHFitter
 
+
 # INPUTS
-if (len(sys.argv)<9):
-  print('Need all 8 args!')
+if (len(sys.argv)<8):
+  print('Need at least 7 args!')
   exit()
 runMode = int(sys.argv[1])
-peopleTF = int(sys.argv[2])==1
+dataTYPE = int(sys.argv[2])
 iterNumber = int(sys.argv[3])
 maxPts = int(sys.argv[4])
 #confint options 0.95, 0.99, 0.999,...
 confint = float(sys.argv[5])
-survivalTF = int(sys.argv[6]) == 1
-big_file = sys.argv[7]
-mydir= sys.argv[8]
+big_file = sys.argv[6]
+mydir= sys.argv[7]
+if (len(sys.argv)>8):
+  peopleTF = int(sys.argv[8])==1
+  survivalTF = int(sys.argv[9]) == 1
+else:
+  peopleTF = True
+  survivalTF = False
+# dataTYPE:
+# 0: ST dataset, with repeated samples from same patients, ID is already a field in the database, goal is PATIENTS
+# 1: COVA dataaset, single sample per patient, goal is number of EVENTS not PATIENTS
+# 2: BAI dataset, longitudinal survival data, goal is number of PATIENTS
+
 print('Running mode %d with survivalTF=%r peopleTF=%r iteration %d, maxpts %d, CI: %0.6f' % (runMode,survivalTF,peopleTF,iterNumber,maxPts,confint))
 print('Input file = %s' % big_file)
 print('Output directory = %s' % mydir)
@@ -79,8 +92,11 @@ def runOneSet(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint
     for boots in range(bootReps):
       boot_subs = makeSubGroup(sub_uids,N,withReplacement,peopleTF)
       myBoot= uids[sub_uids[boot_subs]]
-      mask = c['ID'].isin(myBoot)
-      c_subset = c.loc[mask]
+      # the following code allows for repeated samples of the same ID
+      c_subset = pd.DataFrame()
+      for i in range(len(myBoot)):
+        c_subA = c.loc[c.ID==myBoot[i],:]
+        c_subset = pd.concat([c_subset,c_subA])
       resultX[boots,:] = calcX(c_subset,c,survivalTF)
     
     with open(fn, 'a') as f:
@@ -141,7 +157,7 @@ def calcX(c_subset,c,survivalTF):
     fpr, tpr, thresholds = metrics.roc_curve(y, pred, pos_label=1)
     AUC = metrics.auc(fpr, tpr)
 
-    # GET OBS / EXP  ie calibration in the large, CIL
+    # GET EXP/OBS  ie calibration in the large, CIL
     CIL = np.sum(pred) / np.sum(y)
 
     X = [slope,AUC,CIL]
@@ -232,7 +248,7 @@ def showSummary(rwd,bias,covp,numLIST,oldALL,survivalTF):
   B.columns = ['howmany','confint','BIAS slope','BIAS ' + useme,'BIAS CIL']
   B.drop(['howmany','confint'],axis=1)
   C.columns = ['howmany','confint','COVP slope','COVP ' + useme,'COVP CIL']
-  C.drop(['howmany','confint',axis=1)
+  C.drop(['howmany','confint'],axis=1)
   ALL = pd.concat([R,B,C],axis=1)
   ALL.index = numLIST
 
@@ -279,10 +295,34 @@ def plotZING(prefixN,numLIST,survivalTF):
 # prepare big file
 T1= time.time()
 os.chdir(mydir)
-c = pd.read_csv(big_file,sep=',')
-uids = np.array(range(c.shape[0]))
-c['ID'] = uids
-
+if dataTYPE==0:
+  # ST datafile
+  c = pd.read_csv(big_file,sep=',',names=['ID','szTF','AI','RMR'])
+  uids = pd.unique(c.ID)
+  c.rename(columns={'szTF':'event'},inplace=True)
+  c.rename(columns={'AI':'p'},inplace=True)
+  peopleTF=True
+  survivalTF=False
+elif dataTYPE==1:
+  # COVA datafile
+  c = pd.read_csv(big_file,sep=',')
+  uids = np.array(range(c.shape[0]))
+  c['ID'] = uids
+  AInames= ['Prob-dead','Prob-ICU-MV','Prob-Hosp']
+  c['p'] = (c[AInames[0]] + c[AInames[1]] + c[AInames[2]])/100
+  c['event'] = 0.0 + (c['actual']>0)
+  peopleTF=False
+  survivalTF=False
+elif dataTYPE==2:
+  c = pd.read_csv(big_file,sep=',')
+  uids =  uids = np.array(range(c.shape[0]))
+  c['ID'] = uids
+  peopleTF=True
+  survivalTF=True
+else:
+  c = pd.read_csv(big_file,sep=',')
+  uids =  uids = np.array(range(c.shape[0]))
+  c['ID'] = uids
 
 howmany = maxPts
 
