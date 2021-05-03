@@ -18,7 +18,8 @@ runMode=$1
 # this determined that .99 is good for confint
 conflist='0.955 0.997 0.9999 0.999999'
 ilist=`seq 1 1 9999`
-maxlist='125 150 175 200'
+#maxlist='125 150 175 200'
+maxlist='200'
 iterNumber=0
 case $runMode in
     1)
