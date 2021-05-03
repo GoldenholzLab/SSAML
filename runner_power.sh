@@ -2,8 +2,14 @@
 
 # constants
 maxPts=1613
-infile=/myfiles/inputDataFile.csv
-outdir=/myfiles/dir_for_outputs
+localMAC=0
+if [ $localMAC==1 ]; then
+    infile='/myfiles/inputDataFile.csv'
+    outdir='/myfiles/dir_for_outputs'
+else
+    infile='/home/dmg16/OUTPUT_for_paper/holdoutisThisReal_v2.csv'
+    outdir='/home/dmg16/SSAML/OUT'
+fi
 dataTYPE=0
 runMode=$1
 
@@ -17,19 +23,25 @@ iterNumber=0
 case $runMode in
     1)
         # This is runMode 1 - submit batches of scripts here (several hours)
+        runMode=1
         for confint in $conflist; do
             for maxPts in $maxlist; do
-                #for iterNumber in $ilist; do
-                runMode=1
-                python power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
-                #done
+                for iterNumber in $ilist; do            
+                    sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
+                done
+            done
+        done
+        ;;
+    2)
+        runMode=2
+        for confint in $conflist; do
+            for maxPts in $maxlist; do
                 maxP=`printf "%04d" $maxPts`
                 FILE=num${maxP}_${confint}.csv
                 if [ ! -f "$FILE" ]; then
                     cat num${maxP}????_${confint}.csv > $FILE
                     mv num${maxP}????_${confint}.csv holder/
                 fi
-                runMode=2
                 python power.py $runMode $peopleTF $iterNumber $maxPts $confint $survivalTF $infile $outdir
                 fullResultName="full${maxP}_${confint}.csv"
                 head -n 1 $fullResultName >> RWD_${confint}.txt
