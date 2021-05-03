@@ -3,7 +3,7 @@
 # constants
 maxPts=1613
 localMAC=0
-if [ $localMAC==1 ]; then
+if [[ $localMAC -eq 1 ]]; then
     infile='/myfiles/inputDataFile.csv'
     outdir='/myfiles/dir_for_outputs'
 else
