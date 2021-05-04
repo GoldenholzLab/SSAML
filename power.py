@@ -69,7 +69,7 @@ print('Output directory = %s' % mydir)
 
 # CONSTANT DEFINITIONS
 withReplacement = True
-resampReps=1
+resampReps=40
 bootReps=1000
 # this flag is for doing ZING files that produces a figure. It makes more files, and therefore is optional.
 doEXTRA=True
@@ -204,7 +204,7 @@ def getSummary(fName,fullResultName,trueX,howmany,confint):
   # now read in all the iterations
   P1 = pd.read_csv(fName,header=None)
   full_result = np.zeros((3,5))
-  for subSCORE in range(2,5):
+  for subSCORE in range(3):
     theTrue = trueX[subSCORE]
     theThree = np.array(P1.iloc[:,(3*subSCORE):(3*subSCORE+3)])
     # RDW: get ave RDW. RDW = CI / true
@@ -334,18 +334,23 @@ if runMode==2:
   # to clean up after runmode 1
   fName = 'num' + str(howmany).zfill(4) +  '_' + str(confint) + '.csv'
   fullResultName = 'full' + str(howmany).zfill(4) +  '_' + str(confint) + '.csv'
-  trueX = calcX(c,c)
+  trueX = calcX(c,c,survivalTF)
   getSummary(fName,fullResultName,trueX,howmany,confint)
   
 if runMode==3:
-  temp=np.empty((9,len(numLIST)))
+  R = pd.read_csv("RWD_0.955.txt",delimiter=',',header=None)
+  R.columns = ['howmany','confint','RDW slope','RWD C-index','RWD CIL']
+  numLIST = R['howmany']
+  clist=R['confint']
+
+  temp=np.empty((11,len(numLIST)))
   temp[:]=np.nan
   if survivalTF==True:
     useme = 'C-index'
   else:
     useme = 'AUC'
 
-  ALL = pd.DataFrame(temp,index=['confint','RDW slope','RWD ' + useme,'RWD CIL','BIAS slope','BIAS ' + useme,'BIAS CIL','COVP slope','COVP ' + useme,'COVP CIL'],columns=numLIST)
+  ALL = pd.DataFrame(temp,index=['num','confint','RDW slope','RWD ' + useme,'RWD CIL','BIAS slope','BIAS ' + useme,'BIAS CIL','COVP slope','COVP ' + useme,'COVP CIL'],columns=numLIST)
   for confint in reversed(clist):
     print('CI = %0.3f' % confint)
     ALL = showSummary('RWD' + '_' + str(confint) + '.txt','BIAS' + '_' + str(confint) + '.txt','COVP' + '_' + str(confint) + '.txt',numLIST,ALL,survivalTF)
