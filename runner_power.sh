@@ -1,25 +1,22 @@
 #!/bin/bash
 
 # constants
+p=`pwd`
 maxPts=1613
 localMAC=0
 if [[ $localMAC -eq 1 ]]; then
     infile='/myfiles/inputDataFile.csv'
     outdir='/myfiles/dir_for_outputs'
 else
-    infile='/home/dmg16/OUTPUT_for_paper/holdoutisThisReal_v2.csv'
+    infile='/home/dmg16/deepMan/OUTPUT_for_paper/holdoutisThisReal_v2.csv'
     outdir='/home/dmg16/SSAML/OUT'
 fi
 dataTYPE=0
 runMode=$1
 
-#runMode=0
-#sbatch run_bai 0 0 0 0
-# this determined that .99 is good for confint
 conflist='0.955 0.997 0.9999 0.999999'
-ilist=`seq 1 1 9999`
-#maxlist='125 150 175 200'
-maxlist='200'
+ilist=`seq 0 1 249`
+maxlist='100 150 200 250'
 iterNumber=0
 case $runMode in
     1)
@@ -35,6 +32,7 @@ case $runMode in
         ;;
     2)
         runMode=2
+        cd $outdir
         for confint in $conflist; do
             for maxPts in $maxlist; do
                 maxP=`printf "%04d" $maxPts`
@@ -43,7 +41,7 @@ case $runMode in
                     cat num${maxP}????_${confint}.csv > $FILE
                     mv num${maxP}????_${confint}.csv holder/
                 fi
-                python power.py $runMode $peopleTF $iterNumber $maxPts $confint $survivalTF $infile $outdir
+                python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
                 fullResultName="full${maxP}_${confint}.csv"
                 head -n 1 $fullResultName >> RWD_${confint}.txt
                 head -n 2 $fullResultName | tail -n 1 >> BIAS_${confint}.txt
@@ -56,7 +54,7 @@ case $runMode in
             done    
         done
         runMode=3
-        python power.py $runMode $peopleTF $iterNumber $maxPts $confint $survivalTF $infile $outdir
+        python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
         ;;
     *)
         ;;
