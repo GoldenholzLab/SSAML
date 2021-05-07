@@ -15,7 +15,7 @@ dataTYPE=0
 runMode=$1
 
 conflist='0.955 0.997 0.9999 0.999999'
-ilist=`seq 0 1 249`
+ilist=`seq 0 1 24`
 maxlist='100 150 200 250'
 iterNumber=0
 case $runMode in
@@ -29,6 +29,8 @@ case $runMode in
                 done
             done
         done
+        cd $outdir
+        echo $conflist > conflist.setup
         ;;
     2)
         runMode=2

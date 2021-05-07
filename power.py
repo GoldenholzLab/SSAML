@@ -222,14 +222,15 @@ def getSummary(fName,fullResultName,trueX,howmany,confint):
     COVP = np.mean(TFs[np.isfinite(TFs)])
     #COVP = np.average(TFs)    
 
-    full_result[:,subSCORE] = [ave_rdw,ave_bias,COVP]
+    full_result[:,subSCORE+2] = [ave_rdw,ave_bias,COVP]
 
-  full_result[:,0] = howmany
-  full_result[:,1] = confint
   # only 3 digits interesting
   full_result = np.floor(1000*full_result) / 1000
+  # put in the howmany and confint, which don't need only 3 digits
+  full_result[:,0] = howmany
+  full_result[:,1] = confint
   # write the output of the full result
-  pd.DataFrame(full_result).to_csv(fullResultName,header=None, index=None)
+  pd.DataFrame(full_result).to_csv(fullResultName,header=None, index=None,float_format='%0.6f')
   return  
 
 def showSummary(rwd,bias,covp,numLIST,oldALL,survivalTF): 
@@ -244,11 +245,11 @@ def showSummary(rwd,bias,covp,numLIST,oldALL,survivalTF):
 
   R.columns = ['howmany','confint','RDW slope','RWD ' + useme,'RWD CIL']
   numLIST = R['howmany']
-  R.drop('howmany',axis=1)
+  R = R.drop('howmany',axis=1)
   B.columns = ['howmany','confint','BIAS slope','BIAS ' + useme,'BIAS CIL']
-  B.drop(['howmany','confint'],axis=1)
+  B = B.drop(['howmany','confint'],axis=1)
   C.columns = ['howmany','confint','COVP slope','COVP ' + useme,'COVP CIL']
-  C.drop(['howmany','confint'],axis=1)
+  C = C.drop(['howmany','confint'],axis=1)
   ALL = pd.concat([R,B,C],axis=1)
   ALL.index = numLIST
 
@@ -338,21 +339,22 @@ if runMode==2:
   getSummary(fName,fullResultName,trueX,howmany,confint)
   
 if runMode==3:
-  R = pd.read_csv("RWD_0.955.txt",delimiter=',',header=None)
-  R.columns = ['howmany','confint','RDW slope','RWD C-index','RWD CIL']
-  numLIST = R['howmany']
-  clist=R['confint']
+  x = pd.read_csv('conflist.setup',delimiter=' ',header=None)
+  clist=np.array(x.iloc[0,])
+  x = pd.read_csv("RWD_0.955.txt",delimiter=',',header=None)
+  x.columns = ['howmany','confint','RDW slope','RWD C-index','RWD CIL']
+  numLIST = np.array(x.howmany)
+  numLIST = numLIST.astype(int)
 
-  temp=np.empty((11,len(numLIST)))
+  temp=np.empty((10,len(numLIST)))
   temp[:]=np.nan
   if survivalTF==True:
     useme = 'C-index'
   else:
     useme = 'AUC'
 
-  ALL = pd.DataFrame(temp,index=['num','confint','RDW slope','RWD ' + useme,'RWD CIL','BIAS slope','BIAS ' + useme,'BIAS CIL','COVP slope','COVP ' + useme,'COVP CIL'],columns=numLIST)
+  ALL = pd.DataFrame(temp,index=['confint','RDW slope','RWD ' + useme,'RWD CIL','BIAS slope','BIAS ' + useme,'BIAS CIL','COVP slope','COVP ' + useme,'COVP CIL'],columns=numLIST)
   for confint in reversed(clist):
-    print('CI = %0.3f' % confint)
     ALL = showSummary('RWD' + '_' + str(confint) + '.txt','BIAS' + '_' + str(confint) + '.txt','COVP' + '_' + str(confint) + '.txt',numLIST,ALL,survivalTF)
   print('The frankenstein is...')
   print(ALL)
