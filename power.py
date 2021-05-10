@@ -78,10 +78,9 @@ doEXTRA=True
 
 # FUNCTION DEFINITIONS
 
-
 def runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF):
   sub_uids = makeSubGroup(uids,N,withReplacement,peopleTF)
-  resultX = []
+  resultX = np.zeros((bootReps,3))
   for boots in range(bootReps):
     boot_subs = makeSubGroup(sub_uids,N,withReplacement,peopleTF)
     myBoot= uids[sub_uids[boot_subs]]
@@ -90,9 +89,9 @@ def runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,c
     for i in range(len(myBoot)):
       ids.extend(np.where(c.ID==myBoot[i])[0])
     c_subset = c.iloc[ids].reset_index(drop=True)
-    resultX.append( calcX(c_subset,c,survivalTF) )
-  return np.array(resultX)
+    resultX[boots,:] = calcX(c_subset,c,survivalTF)
 
+  return np.array(resultX)
 
 def runOneSet(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF):
   # given N patients and the data, bootstrap for different population sizes to estimate ranges
@@ -102,8 +101,7 @@ def runOneSet(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint
   # survivalTF is a flag to use or not use survival stats type summary values
 
   fn = fName
-  fn2 = 'ZING' + fName
-  
+  fn2 = 'ZING' + fName 
   parallel = False
   n_jobs = 1  # number of processors
   if parallel:
@@ -112,7 +110,7 @@ def runOneSet(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint
       
   else:
     resultXs = [runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF) for resamp in tqdm(range(resampReps))]
-    
+
   for resultX in resultXs:
     with open(fn, 'a') as f:
       for i in range(3):
@@ -199,15 +197,14 @@ def printConf(arrX,ind,f,firstTF,cutoff):
   # firstTF if true will omit leading ,
 
   arr = arrX[:,ind]
-  #marr = np.nanmean(arr)
+  marr = np.nanmean(arr)
 
   # gaussian 95% CI
   #cutoff options = 0.68, 0.955, 0.997, 0.9999, 0.999999, etc
-  #CIlower,CIupper = norm.interval(cutoff, loc=marr, scale=np.std(arr))
+  CIlower,CIupper = stats.norm.interval(cutoff, loc=marr, scale=np.std(arr))
   # if you wanted to use NONPARAMETRIC CI...
   # CIlower = np.percentile(arr,2.5)
   # CIupper = np.percentile(arr,97.5)
-  marr, CIlower, CIupper = np.percentile(arr, (50, (1-cutoff)/2*100, (1+cutoff)/2*100))
 
   if firstTF==False:
     print(f',',end='',file=f)
@@ -299,11 +296,11 @@ def plotZING(prefixN,numLIST,survivalTF):
 
   fig, (ax1, ax2, ax3) = plt.subplots(3,1)
   plt.subplot(3,1,1)
-  ax1 = sns.boxplot(x="N", y="Slope", data=bigD)
+  ax1 = sns.boxplot(x="N", y="Slope", data=bigD,showfliers=False)
   plt.subplot(3,1,2)
-  ax2 = sns.boxplot(x="N", y=useme, data=bigD)
+  ax2 = sns.boxplot(x="N", y=useme, data=bigD,showfliers=False)
   plt.subplot(3,1,3)
-  ax3 = sns.boxplot(x="N", y="CIL",data=bigD)
+  ax3 = sns.boxplot(x="N", y="CIL",data=bigD,showfliers=False)
   fig.savefig('Zplot.jpg',dpi=300)
   return
 
@@ -349,7 +346,7 @@ if runMode==1:
   
 if runMode==2:
   # to clean up after runmode 1
-  fName = 'num' + str(howmany).zfill(4) + str(iterNumber).zfill(4) + '_' + str(confint) + '.csv'
+  fName = 'num' + str(howmany).zfill(4) +  '_' + str(confint) + '.csv'
   fullResultName = 'full' + str(howmany).zfill(4) +  '_' + str(confint) + '.csv'
   trueX = calcX(c,c,survivalTF)
   getSummary(fName,fullResultName,trueX,howmany,confint)
