@@ -12,7 +12,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_auc_score, roc_curve, accuracy_score, balanced_accuracy_score, cohen_kappa_score, f1_score
-from tqdm import tqdm
 
 
 def get_metric(y, yp):

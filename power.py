@@ -28,16 +28,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
-from scipy import stats
 from scipy.stats import norm
 import os
 import sys
+from joblib import Parallel, delayed
 import time
 from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import brier_score_loss
 from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 from lifelines import KaplanMeierFitter,CoxPHFitter
+from tqdm import tqdm   # for showing progress bar
 
 
 # INPUTS
@@ -77,6 +78,22 @@ doEXTRA=True
 
 # FUNCTION DEFINITIONS
 
+
+def runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF):
+  sub_uids = makeSubGroup(uids,N,withReplacement,peopleTF)
+  resultX = []
+  for boots in range(bootReps):
+    boot_subs = makeSubGroup(sub_uids,N,withReplacement,peopleTF)
+    myBoot= uids[sub_uids[boot_subs]]
+    # the following code allows for repeated samples of the same ID
+    ids = []
+    for i in range(len(myBoot)):
+      ids.extend(np.where(c.ID==myBoot[i])[0])
+    c_subset = c.iloc[ids].reset_index(drop=True)
+    resultX.append( calcX(c_subset,c,survivalTF) )
+  return np.array(resultX)
+
+
 def runOneSet(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF):
   # given N patients and the data, bootstrap for different population sizes to estimate ranges
   # fName is the filename for output, such as 'boom' which becomes 'boom-01.csv'
@@ -85,20 +102,18 @@ def runOneSet(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint
   # survivalTF is a flag to use or not use survival stats type summary values
 
   fn = fName
-  fn2 = 'ZING' + fName 
-  for resamp in range(resampReps):
-    sub_uids = makeSubGroup(uids,N,withReplacement,peopleTF)
-    resultX = np.zeros((bootReps,3))
-    for boots in range(bootReps):
-      boot_subs = makeSubGroup(sub_uids,N,withReplacement,peopleTF)
-      myBoot= uids[sub_uids[boot_subs]]
-      # the following code allows for repeated samples of the same ID
-      c_subset = pd.DataFrame()
-      for i in range(len(myBoot)):
-        c_subA = c.loc[c.ID==myBoot[i],:]
-        c_subset = pd.concat([c_subset,c_subA])
-      resultX[boots,:] = calcX(c_subset,c,survivalTF)
+  fn2 = 'ZING' + fName
+  
+  parallel = False
+  n_jobs = 1  # number of processors
+  if parallel:
+    with Parallel(n_jobs=n_jobs, verbose=False) as par:
+      resultXs = par(delayed(runOneSet_inner)(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF) for resamp in tqdm(range(resampReps)))
+      
+  else:
+    resultXs = [runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF) for resamp in tqdm(range(resampReps))]
     
+  for resultX in resultXs:
     with open(fn, 'a') as f:
       for i in range(3):
         printConf(resultX,i,f,i==0,confint)
@@ -184,14 +199,15 @@ def printConf(arrX,ind,f,firstTF,cutoff):
   # firstTF if true will omit leading ,
 
   arr = arrX[:,ind]
-  marr = np.nanmean(arr)
+  #marr = np.nanmean(arr)
 
   # gaussian 95% CI
   #cutoff options = 0.68, 0.955, 0.997, 0.9999, 0.999999, etc
-  CIlower,CIupper = stats.norm.interval(cutoff, loc=marr, scale=np.std(arr))
+  #CIlower,CIupper = norm.interval(cutoff, loc=marr, scale=np.std(arr))
   # if you wanted to use NONPARAMETRIC CI...
   # CIlower = np.percentile(arr,2.5)
   # CIupper = np.percentile(arr,97.5)
+  marr, CIlower, CIupper = np.percentile(arr, (50, (1-cutoff)/2*100, (1+cutoff)/2*100))
 
   if firstTF==False:
     print(f',',end='',file=f)
@@ -322,7 +338,7 @@ elif dataTYPE==2:
   survivalTF=True
 else:
   c = pd.read_csv(big_file,sep=',')
-  uids =  uids = np.array(range(c.shape[0]))
+  uids = np.array(range(c.shape[0]))
   c['ID'] = uids
 
 howmany = maxPts
@@ -333,7 +349,7 @@ if runMode==1:
   
 if runMode==2:
   # to clean up after runmode 1
-  fName = 'num' + str(howmany).zfill(4) +  '_' + str(confint) + '.csv'
+  fName = 'num' + str(howmany).zfill(4) + str(iterNumber).zfill(4) + '_' + str(confint) + '.csv'
   fullResultName = 'full' + str(howmany).zfill(4) +  '_' + str(confint) + '.csv'
   trueX = calcX(c,c,survivalTF)
   getSummary(fName,fullResultName,trueX,howmany,confint)
