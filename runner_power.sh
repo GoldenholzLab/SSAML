@@ -48,11 +48,7 @@ case $runMode in
         for confint in $conflist; do
             for maxPts in $maxlist; do
                 for iterNumber in $ilist; do       
-                    if [[ $dataTYPE -le 1 ]]; then
-                        sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
-                    else
-                        ./run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
-                    fi
+                    sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
                 done
             done
         done
