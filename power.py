@@ -201,7 +201,7 @@ def printConf(arrX,ind,f,firstTF,cutoff):
 
   # gaussian 95% CI
   #cutoff options = 0.68, 0.955, 0.997, 0.9999, 0.999999, etc
-  CIlower,CIupper = stats.norm.interval(cutoff, loc=marr, scale=np.std(arr))
+  CIlower,CIupper = norm.interval(cutoff, loc=marr, scale=np.std(arr))
   # if you wanted to use NONPARAMETRIC CI...
   # CIlower = np.percentile(arr,2.5)
   # CIupper = np.percentile(arr,97.5)
