@@ -15,11 +15,6 @@ from scipy.stats import norm
 import os
 import sys
 import time
-#from sklearn import metrics
-#from sklearn.linear_model import LinearRegression
-#from sklearn.metrics import brier_score_loss
-#from sklearn.calibration import CalibratedClassifierCV, calibration_curve
-#from lifelines import KaplanMeierFitter,CoxPHFitter
 
 
 # constant definitions

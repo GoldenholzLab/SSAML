@@ -5,7 +5,7 @@
 # Daniel Goldenholz, MD, PhD
 
 # USAGE:
-#power.py <runMode> <dataTYPE> <iterNumber> <maxPts> <confint> <infile> <outdir> <peopleTF> <survivalTF>
+#power.py <runMode> <dataTYPE> <iterNumber> <maxPts> <confint> <infile> <outdir> <peopleTF> <survivalTF> <resampReps>
 # runMode - the mode we are running
 #  = 1 iterate
 #  = 2 summarize the local iterations
@@ -19,6 +19,7 @@
 # outdir - full path of the output data directory
 # peopleTF -- 1 means you want people. 0 means you want EVENTS.
 # survivalTF - 0 if no survival stats, 1 if survival based stats
+# resampReps = 40 if not listed, but how many outter reps to do
 
 # First load up the libraries needed
 # this for drawing headless
@@ -56,9 +57,12 @@ mydir= sys.argv[7]
 if (len(sys.argv)>8):
   peopleTF = int(sys.argv[8])==1
   survivalTF = int(sys.argv[9]) == 1
+  resampReps = int(sys.argv[10])
 else:
   peopleTF = True
   survivalTF = False
+  resampReps = 40
+
 # dataTYPE:
 # 0: ST dataset, with repeated samples from same patients, ID is already a field in the database, goal is PATIENTS
 # 1: COVA dataaset, single sample per patient, goal is number of EVENTS not PATIENTS

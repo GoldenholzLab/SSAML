@@ -7,7 +7,6 @@ localMAC=0
 runMode=$1
 dataTYPE=$2
 
-
 if [[ $localMAC -eq 1 ]]; then
     infile='/myfiles/inputDataFile.csv'
     outdir='/myfiles/dir_for_outputs'
@@ -17,18 +16,24 @@ else
         outdir='/home/dmg16/SSAML/OUTst'
         peopleTF=1
         survivalTF=0
+        resampReps=40
+        ilist=`seq 0 1 24`
         maxlist='20 40 60 80'
     elif [[ $dataTYPE -eq 1 ]]; then
         infile='/home/dmg16/SSAML/risk_7day-simplified.csv'
         outdir='/home/dmg16/SSAML/OUTcova'
         peopleTF=0
         survivalTF=0
+        resampReps=40
+        ilist=`seq 0 1 24`
         maxlist='125 150 175 200'
     elif [[ $dataTYPE -eq 2 ]]; then
         infile='/home/dmg16/SSAML/BA_For_Daniel.csv'
         outdir='/home/dmg16/SSAML/OUTbai'
         peopleTF=1
         survivalTF=1
+        resampReps=10
+        ilist=`seq 0 1 99`
         maxlist='200 500 1000 1500'
     else
         echo "Error. No datatype specified."
@@ -37,7 +42,7 @@ else
 fi
 
 conflist='0.955 0.997 0.9999 0.999999'
-ilist=`seq 0 1 24`
+
 iterNumber=0
 case $runMode in
     1)
