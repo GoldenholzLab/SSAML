@@ -24,5 +24,6 @@ infile=$6
 outdir=$7
 peopleTF=$8
 survivalTF=$9
+resampReps=$10
 
-python -u power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
+python -u power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
