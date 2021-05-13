@@ -53,7 +53,7 @@ case $runMode in
         for confint in $conflist; do
             for maxPts in $maxlist; do
                 for iterNumber in $ilist; do       
-                    sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
+                    sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
                 done
             done
         done
@@ -71,8 +71,8 @@ case $runMode in
                     cat num${maxP}????_${confint}.csv > $FILE
                     mv num${maxP}????_${confint}.csv holder/
                 fi
-                echo "python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF"
-                python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
+                echo "python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps"
+                python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
                 fullResultName="full${maxP}_${confint}.csv"
                 head -n 1 $fullResultName >> RWD_${confint}.txt
                 head -n 2 $fullResultName | tail -n 1 >> BIAS_${confint}.txt
@@ -87,14 +87,14 @@ case $runMode in
         runMode=3
         maxPts=0
         confint=0
-        python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
+        python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
         ;;
     3)
         runMode=3
         cd $outdir
         maxPts=0
         confint=0
-        python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF
+        python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
         ;;
     *)
         ;;
