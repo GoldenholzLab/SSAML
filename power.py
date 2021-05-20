@@ -68,13 +68,12 @@ else:
 # 1: COVA dataaset, single sample per patient, goal is number of EVENTS not PATIENTS
 # 2: BAI dataset, longitudinal survival data, goal is number of PATIENTS
 
-print('Running mode %d with survivalTF=%r peopleTF=%r iteration %d, maxpts %d, CI: %0.6f' % (runMode,survivalTF,peopleTF,iterNumber,maxPts,confint))
+print('Running mode %d with survivalTF=%r peopleTF=%r iteration %d, maxpts %d, CI: %0.6f, resampReps=%d' % (runMode,survivalTF,peopleTF,iterNumber,maxPts,confint,resampReps))
 print('Input file = %s' % big_file)
 print('Output directory = %s' % mydir)
 
 # CONSTANT DEFINITIONS
 withReplacement = True
-resampReps=40
 bootReps=1000
 # this flag is for doing ZING files that produces a figure. It makes more files, and therefore is optional.
 doEXTRA=True
