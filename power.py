@@ -84,7 +84,8 @@ doEXTRA=True
 
 def runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF):
   sub_uids = makeSubGroup(uids,N,withReplacement,peopleTF)
-  resultX = np.zeros((bootReps,3))
+  #resultX = np.zeros((bootReps,3))
+  resultX = []   # calcX sometimes throws error due to specific bootstrap indices, only keep good ones
   for boots in range(bootReps):
     boot_subs = makeSubGroup(sub_uids,N,withReplacement,peopleTF)
     myBoot= uids[sub_uids[boot_subs]]
@@ -93,7 +94,11 @@ def runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,c
     for i in range(len(myBoot)):
       ids.extend(np.where(c.ID==myBoot[i])[0])
     c_subset = c.iloc[ids].reset_index(drop=True)
-    resultX[boots,:] = calcX(c_subset,c,survivalTF)
+    #resultX[boots,:] = calcX(c_subset,c,survivalTF)
+    try:
+      resultX.append(calcX(c_subset,c,survivalTF))
+    except Exception as ee:
+      continue
 
   return np.array(resultX)
 
@@ -137,12 +142,12 @@ def calcX(c_subset,c,survivalTF):
     cph = CoxPHFitter()
     cph2 = CoxPHFitter()
 
-    cph.fit(c_subset, duration_col='T', event_col='C', formula = "z")
+    cph.fit(c_subset, duration_col='T', event_col='C', formula = "z", cluster_col='ID')
 
     # GET SLOPE
     newz = cph.predict_log_partial_hazard(c)
     c['newz'] = newz
-    cph2.fit(c,duration_col='T',event_col='C', formula = 'newz')
+    cph2.fit(c,duration_col='T',event_col='C', formula = 'newz', cluster_col='ID')
     temp = np.log(cph2.hazard_ratios_)
     slope = temp.newz
 
