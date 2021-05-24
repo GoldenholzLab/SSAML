@@ -34,7 +34,7 @@ else
         survivalTF=1
         resampReps=10
         ilist=`seq 0 1 99`
-        maxlist='200 500 1000 1500'
+        maxlist='500 1000 1500 2000'
     else
         echo "Error. No datatype specified."
         exit 1

@@ -70,16 +70,16 @@ def plotColumn(dat,colNum,numLIST,fig,ax,tName):
 # MAIN
 # prepare big file
 T1= time.time()
+mydir = '/Users/danisized/iCloud/Latest/power-calculator-stat/Zfiles'
 
-os.chdir('/Users/danisized/iCloud/Latest/power-calculator-stat/Zfiles')
+os.chdir(mydir)
 numLIST = [200,500,1000,1500]
 bigD_bai = getZING('BAsmallZ','C-index',numLIST)
 numLIST = [125, 150, 175, 200]
 bigD_cov = getZING('COsmallZ','C-index',numLIST)
-mydir = '/home/dmg16/powercalc/st'
-numLIST=[20,30,40,50]
+numLIST=[20,40,60,80]
 bigD_st = getZING('STsmallZ','C-index',numLIST)
-#bigD_st = bigD_cov
+
 
 
 print('plotting...')
