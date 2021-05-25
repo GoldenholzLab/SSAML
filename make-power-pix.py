@@ -73,7 +73,7 @@ T1= time.time()
 mydir = '/Users/danisized/iCloud/Latest/power-calculator-stat/Zfiles'
 
 os.chdir(mydir)
-numLIST = [200,500,1000,1500]
+numLIST = [500,1000,1500,2000]
 bigD_bai = getZING('BAsmallZ','C-index',numLIST)
 numLIST = [125, 150, 175, 200]
 bigD_cov = getZING('COsmallZ','C-index',numLIST)
@@ -87,7 +87,7 @@ fig, ax = plt.subplots(3,3,sharex='col',sharey='row',figsize=(8,8))
 # make a little extra space between the subplots
 fig.subplots_adjust(hspace=0.2)
 
-numLIST = [200,500,1000,1500]
+numLIST = [500,1000,1500,2000]
 plotColumn(bigD_bai,1,numLIST,fig,ax,'BAI')
 numLIST = [125, 150, 175, 200]
 plotColumn(bigD_cov,2,numLIST,fig,ax,'COVA')
