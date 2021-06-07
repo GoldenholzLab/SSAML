@@ -2,7 +2,8 @@
 holdoutisThisReal_v2.csv
 risk_7day-simplified.csv
 BA_For_Daniel.csv
-OUT/
+OUT*
+old*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
