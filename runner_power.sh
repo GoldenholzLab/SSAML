@@ -66,9 +66,12 @@ case $dataTYPE in
         #outdir='/home/dmg16/SSAML/OUTcova'
         peopleTF=0
         survivalTF=0
-        resampReps=40
-        ilist=`seq 0 1 24`
-        maxlist='125 150 175 200'
+        resampReps=10
+        maxlist='40 50 60 70'
+        ilist=`seq 0 1 10`
+        #resampReps=40
+        #maxlist='125 150 175 200'
+        #ilist=`seq 0 1 24`
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     2)

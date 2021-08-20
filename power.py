@@ -234,9 +234,12 @@ def makeSubGroup(uids,howmany,withReplace,peopleTF):
     cs = np.cumsum(c.event[perm])
     # find where we can cut to have enough events
     inds = np.where(cs>=howmany)
-    # now cut there
-    thisManyPeople = inds[0][0]
-    # keep that many people in the permuted list
+    if len(inds[0])==0:     # if there are not enough, just take them all
+      thisManyPeople = len(uids)
+    else:               # this is the normal case
+      # now cut there
+      thisManyPeople = inds[0][0]
+      # keep that many people in the permuted list
     sub_uids = perm[0:thisManyPeople]
 
   return np.sort(sub_uids)
