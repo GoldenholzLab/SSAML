@@ -20,7 +20,7 @@ Info about the 3 external datasets we used:
 # 1: COVA dataaset, single sample per patient, goal is number of EVENTS not PATIENTS
 #     we assume columns are present: ['actual','Prob-dead','Prob-ICU-MV','Prob-Hosp']
 #     the 'actual' column is the ground truth. The sum of the other Prob columns divided by 100 is assumed to be
-#     0..1 probability prediction
+#     0..1 probability prediction. Of note, for our purposes we only used actual>0 as the outcome of interest.
 # 2: BAI dataset, longitudinal survival data, goal is number of PATIENTS
 #    this assumes a 'z','T',and 'C' columns. z is the z-score value, a covariate for Cox proportional hazard.
 #    T is time in years, and C is censored (1=yes, 0=no).
@@ -31,6 +31,7 @@ WHAT ARE THE IMPORTANT FILES:
 This is a runner script that will submit a sequence of commands. If using a supercomputer, this
 script will submit multiple jobs.
 You will need to edit this script to submit the jobs that are relevant for your task.
+For example, if you want to use a supercomputer, change use_supercomputer to 1. It is set to 0 by default (ie no supercompyer)
 
 2. run_power
 This is the wrapper script for power.py. It is necessary for submitting a supercomputer job. It contains
@@ -52,3 +53,11 @@ from the many bootstrapped samples. It is not required for SSAML use.
 
 3. power-haoqi.py
 The script was used for our simulation tests. It is not required for SSAML.
+
+4. make_fake_data.py
+This was used to produce data files that can be used with SSAML as an example.
+
+5. COVA-FAKE.csv
+this is a fake COVA file which has the proper formatting so that one can test out SSAML with a COVA style dataset.
+We did not provide the true COVA file because it was derived from protected health information.
+

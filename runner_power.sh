@@ -35,6 +35,8 @@ dataTYPE=$2
 
 # constants
 p=`pwd`
+# if 1 here, then submit jobs to a supercomputer. If 0 here, run commands locally
+use_supercomputer=0
 
 ## *** DATATYPE ***  shortcut to set up variables for SSAML based on data type
 # Notes:
@@ -58,8 +60,10 @@ case $dataTYPE in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     1)
-        infile='/home/dmg16/SSAML/risk_7day-simplified.csv'
-        outdir='/home/dmg16/SSAML/OUTcova'
+        infile='/Users/danisized/Documents/GitHub/SSAML/COVA-FAKE.csv'
+        outdir='/Users/danisized/Documents/GitHub/SSAML/OUTcovaFAKE'
+        #infile='/home/dmg16/SSAML/risk_7day-simplified.csv'
+        #outdir='/home/dmg16/SSAML/OUTcova'
         peopleTF=0
         survivalTF=0
         resampReps=40
@@ -94,8 +98,13 @@ case $runMode in
         mkdir -p $outdir/theZING
         for confint in $conflist; do
             for maxPts in $maxlist; do
-                for iterNumber in $ilist; do       
-                    sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+                for iterNumber in $ilist; do     
+                    if [[ $use_supercomputer -eq 1 ]]
+                    then
+                        sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer
+                    else
+                        $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer
+                    fi
                 done
             done
         done

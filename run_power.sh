@@ -9,11 +9,6 @@
 #SBATCH -e slurm/st_%j.err                 # File to which STDERR will be written, including job ID
 #SBATCH --mail-type=FAIL                    # Type of email notification- BEGIN,END,FAIL,ALL
 
-module load gcc/6.2.0
-module load python/3.7.4
-source ~/deep37/bin/activate
-
-cd /home/dmg16/SSAML
 
 runMode=$1
 dataTYPE=$2
@@ -24,6 +19,15 @@ infile=$6
 outdir=$7
 peopleTF=$8
 survivalTF=$9
-resampReps=$10
+resampReps=${10}
+use_supercomputer=${11}
 
+if [[ $use_supercomputer -eq 1 ]]
+then
+    module load gcc/6.2.0
+    module load python/3.7.4
+    source ~/deep37/bin/activate
+
+    cd /home/dmg16/SSAML
+fi
 python -u power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
