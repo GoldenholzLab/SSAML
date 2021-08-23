@@ -41,6 +41,7 @@ PYTHON=python  # this depends on which command do you run python, usually it's `
 
 # if 1 here, then submit jobs to a supercomputer. If 0 here, run commands locally
 use_supercomputer=0
+bootReps=2
 
 ## *** DATATYPE ***  shortcut to set up variables for SSAML based on data type
 # Notes:
@@ -116,12 +117,10 @@ case $runMode in
                 for iterNumber in $ilist; do  
                     if [[ $use_supercomputer -eq 1 ]]
                     then
-                        sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer
+                        sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
                     else
-                        echo here1
-                        echo $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer
-                        $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer
-                        echo here2
+                        echo $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
+                        $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
                     fi
                 done
             done

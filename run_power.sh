@@ -21,6 +21,7 @@ peopleTF=$8
 survivalTF=$9
 resampReps=${10}
 use_supercomputer=${11}
+bootReps=${12}
 
 if [[ $use_supercomputer -eq 1 ]]
 then
@@ -30,6 +31,4 @@ then
 
     cd /home/dmg16/SSAML
 fi
-echo here3
-echo python -u power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
-python -u power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+python -u power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $bootReps
