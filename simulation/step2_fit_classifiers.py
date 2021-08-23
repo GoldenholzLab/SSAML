@@ -15,6 +15,10 @@ from sklearn.metrics import roc_auc_score, roc_curve, accuracy_score, balanced_a
 
 
 def get_metric(y, yp):
+    """
+    for y (actual label) and yp (predicted label),
+    compute various metrics including AUC, accuracy, balanced accuracy, Cohen's kappa and F1 score
+    """
     ## assumes binary class
     auc = roc_auc_score(y, yp[:,1])
     
@@ -36,6 +40,10 @@ def get_metric(y, yp):
     
     
 def fit_model(X, y, Ncv, model_type='logreg', best_params=None, n_jobs=1, random_state=None):
+    """
+    Fit the model with input features `X` and labels `y` with `Ncv`-fold nested cross-validation.
+    The model `model_type` can be logistic regression with ElasticNet regularization (logreg) or random forest (rf).
+    """
     cv_scores_tr = []
     cv_scores_te = []
     models = []
@@ -62,6 +70,7 @@ def fit_model(X, y, Ncv, model_type='logreg', best_params=None, n_jobs=1, random
         ss = StandardScaler().fit(Xtr)
         Xtr = ss.transform(Xtr)
     
+        # define models
         if model_type=='logreg':
             model = LogisticRegression(
                 penalty='elasticnet', class_weight='balanced',
@@ -75,7 +84,8 @@ def fit_model(X, y, Ncv, model_type='logreg', best_params=None, n_jobs=1, random
             model_params = {'n_estimators':[5,10,50,100], 'max_depth':[3,5], 'ccp_alpha':[0.01,0.1,1]}
         else:
             raise ValueError('Unknown model_type: %s'%model_type)
-            
+        
+        # if best_params is not provided
         if best_params is None:
             if len(teid)>0:  # in fold
                 if hasattr(model, 'n_jobs'):
@@ -94,6 +104,8 @@ def fit_model(X, y, Ncv, model_type='logreg', best_params=None, n_jobs=1, random
                     else:
                         exec(f'model.{p} = {val}')
                 
+        # if best_params is provided, params = best_params
+        # assign from params and don't use GridSearchCV
         elif len(params)>0:
             for p in params[cvi]:
                 if '__' in p:
@@ -109,6 +121,7 @@ def fit_model(X, y, Ncv, model_type='logreg', best_params=None, n_jobs=1, random
         if hasattr(model, 'best_estimator_'):
             model = model.best_estimator_
         
+        # calibration, make the predicted probability close to observed probability
         calibrated_model = CalibratedClassifierCV(base_estimator=model, cv='prefit')
         calibrated_model.fit(Xtr, ytr)
         
@@ -139,22 +152,26 @@ def fit_model(X, y, Ncv, model_type='logreg', best_params=None, n_jobs=1, random
     
 if __name__=='__main__':
     simulation_data_dir = 'datasets'
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+        
+    # read dataset list
     df = pd.read_csv(os.path.join(simulation_data_dir, 'simulator_classification_dataset_list.csv'))
+    
+    # define different numbers of samples
     Ns = [100,1000,10000]
     model_types = ['logreg']#, 'rf']
     random_state = 2021
     n_jobs = 8
     Ncv = 5
     output_dir = 'models_predictions'
-
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
     
     for i in tqdm(range(len(df))):
         for n in Ns:
             # generate different training sizes
             df_sim = pd.read_csv(df.Path.iloc[i])
             df_sim = df_sim[:n]  # because datset is shuffled, taking first N approximately keeps the class ratio
+            
             #TODO now assumes event is at the last column
             X = df_sim.values.astype(float)[:,:-1]
             y = df_sim.values[:,-1].astype(int)

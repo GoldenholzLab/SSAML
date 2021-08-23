@@ -1,33 +1,35 @@
 #!/bin/bash
-# This is the master runner script for SSAML.
-# From here, you will define where your data is. You will also specify what data type you have
-# and various parameters of SSAML to run.
-# A master runner script like this can be most helpful when using a supercomputer cluster,
-# because it can send a series of individual job requests in to the cluster.
-#
-# USAGE:
-#  runner_power.sh <runMode> <dataTYPE>
-#   runMode:
-#       1: used to submit a large batch of calculations
-#       2: used to summarize the large batch when they are done. Mode 3 will automatically run afterwards.
-#       3: used to produce the final output after mode 2 has summarized data.
-#   dataTYPE:
-# 0: ST dataset, with repeated samples from same patients, ID is already a field in the database, goal is PATIENTS
-#     there is an assumed column called "szTF" which will be 1 for true and 0 for false, this will be ground truth
-#     there is an assumed column called "AI" which will be a fraction 0..1 for the predicted value
-#     there is an assumed column called "ID" which has a unique ID number for each patient (multiple entries per patient ok)
-#     the columns assumed:'ID','szTF','AI','RMR'. One row per entry. This is a CSV file
-# 1: COVA dataaset, single sample per patient, goal is number of EVENTS not PATIENTS
-#     we assume columns are present: ['actual','Prob-dead','Prob-ICU-MV','Prob-Hosp']
-#     the 'actual' column is the ground truth. The sum of the other Prob columns divided by 100 is assumed to be
-#     0..1 probability prediction
-# 2: BAI dataset, longitudinal survival data, goal is number of PATIENTS
-#    this assumes a 'z','T',and 'C' columns. z is the z-score value, a covariate for Cox proportional hazard.
-#    T is time in years, and C is censored (1=yes, 0=no).
-# TO MODIFY THIS RUNNER SCRIPT FOR YOUR OWN USE:
-#  First, determine what dataset type you have. If similar to one of the example datasets (ST, COVA, BAI), then 
-#  you can use one of the dataTYPE shortcuts above. If not, define a different dataTYPE that sets the appropriate
-#  variables below in the section calle **DATATYPE**
+# if only type in runner_power, the usage is printed
+if [ $# -eq 0 ]; then
+echo "This is the master runner script for SSAML.
+From here, you will define where your data is. You will also specify what data type you have
+and various parameters of SSAML to run.
+A master runner script like this can be most helpful when using a supercomputer cluster,
+because it can send a series of individual job requests in to the cluster.
+
+USAGE:
+runner_power.sh <runMode> <dataTYPE> (the following are only required for dataTYPE=3: <infile> <outdir>)
+  runMode:
+    1: used to submit a large batch of calculations
+    2: used to summarize the large batch when they are done. Mode 3 will automatically run afterwards.
+    3: used to produce the final output after mode 2 has summarized data.
+  dataTYPE:
+    0: ST dataset, with repeated samples from same patients, ID is already a field in the database, goal is PATIENTS
+    there is an assumed column called "szTF" which will be 1 for true and 0 for false, this will be ground truth
+    there is an assumed column called "AI" which will be a fraction 0 to 1 for the predicted value
+    there is an assumed column called "ID" which has a unique ID number for each patient (multiple entries per patient ok)
+    the columns assumed:'ID','szTF','AI','RMR'. One row per entry. This is a CSV file
+    1: COVA dataset, single sample per patient, goal is number of EVENTS not PATIENTS
+    we assume columns are present: ['actual','Prob-dead','Prob-ICU-MV','Prob-Hosp']
+    the 'actual' column is the ground truth. The sum of the other Prob columns divided by 100 is assumed to be 0 to 1 probability prediction
+    2: BAI dataset, longitudinal survival data, goal is number of PATIENTS
+    this assumes a 'z','T',and 'C' columns. z is the z-score value, a covariate for Cox proportional hazard.
+    T is time in years, and C is censored (1=yes, 0=no).
+    O MODIFY THIS RUNNER SCRIPT FOR YOUR OWN USE:
+
+First, determine what dataset type you have. If similar to one of the example datasets (ST, COVA, BAI), then you can use one of the dataTYPE shortcuts above. If not, define a different dataTYPE that sets the appropriate variables below in the section called **DATATYPE**."
+exit
+fi
 
 # Input parameters
 runMode=$1
@@ -35,6 +37,8 @@ dataTYPE=$2
 
 # constants
 p=`pwd`
+PYTHON=python  # this depends on which command do you run python, usually it's `python` or `python3`
+
 # if 1 here, then submit jobs to a supercomputer. If 0 here, run commands locally
 use_supercomputer=0
 
@@ -62,8 +66,6 @@ case $dataTYPE in
     1)
         infile='/Users/danisized/Documents/GitHub/SSAML/COVA-FAKE.csv'
         outdir='/Users/danisized/Documents/GitHub/SSAML/OUTcovaFAKE'
-        #infile='/home/dmg16/SSAML/risk_7day-simplified.csv'
-        #outdir='/home/dmg16/SSAML/OUTcova'
         peopleTF=0
         survivalTF=0
         resampReps=10
@@ -80,6 +82,16 @@ case $dataTYPE in
         peopleTF=1
         survivalTF=1
         resampReps=10
+        ilist=`seq 0 1 99`
+        maxlist='500 1000 1500 2000'
+        conflist='0.955 0.997 0.9999 0.999999'
+        ;;
+    3)
+        infile=$3
+        outdir=$4
+        peopleTF=1
+        survivalTF=0
+        resampReps=40
         ilist=`seq 0 1 99`
         maxlist='500 1000 1500 2000'
         conflist='0.955 0.997 0.9999 0.999999'
@@ -126,8 +138,8 @@ case $runMode in
                     cat num${maxP}????_${confint}.csv > $FILE
                     mv num${maxP}????_${confint}.csv holder/
                 fi
-                echo "python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps"
-                python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+                echo "$PYTHON $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps"
+                $PYTHON $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
                 fullResultName="full${maxP}_${confint}.csv"
                 head -n 1 $fullResultName >> RWD_${confint}.txt
                 head -n 2 $fullResultName | tail -n 1 >> BIAS_${confint}.txt
@@ -144,20 +156,17 @@ case $runMode in
         cd $outdir
         maxPts=0
         confint=0
-        python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+        $PYTHON $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
         ;;
     3)
         runMode=3
         cd $outdir
         maxPts=0
         confint=0
-        python $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+        $PYTHON $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
         ;;
     *)
         echo "ERROR. Only runMode 1,2,3 are allowed."
         ;;
 esac
-
-
-
 
