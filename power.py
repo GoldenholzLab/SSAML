@@ -59,10 +59,13 @@ if (len(sys.argv)>8):
   peopleTF = int(sys.argv[8])==1
   survivalTF = int(sys.argv[9]) == 1
   resampReps = int(sys.argv[10])
+  bootReps = int(sys.argv[11])
+
 else:
   peopleTF = True
   survivalTF = False
   resampReps = 40
+  bootReps = 1000
 
 # dataTYPE:
 # 0: ST dataset, with repeated samples from same patients, ID is already a field in the database, goal is PATIENTS
@@ -75,7 +78,6 @@ print('Output directory = %s' % mydir)
 
 # GLOBAL CONSTANT DEFINITIONS
 withReplacement = True
-bootReps=1000
 # this flag is for doing ZING files that produces a figure. It makes more files, and therefore is optional.
 doEXTRA=True
 # if you want runMode 1 to run using parallel processing, set this to True, and n_jobs as needed

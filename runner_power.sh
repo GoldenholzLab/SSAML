@@ -64,8 +64,8 @@ case $dataTYPE in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     1)
-        infile='/Users/danisized/Documents/GitHub/SSAML/COVA-FAKE.csv'
-        outdir='/Users/danisized/Documents/GitHub/SSAML/OUTcovaFAKE'
+        infile='/home/wolfgang/repos/SSAML/COVA-FAKE.csv' # '/Users/danisized/Documents/GitHub/SSAML/COVA-FAKE.csv'
+        outdir='/home/wolfgang/repos/SSAML/OUTcovaFAKE'  # '/Users/danisized/Documents/GitHub/SSAML/OUTcovaFAKE'
         peopleTF=0
         survivalTF=0
         resampReps=10
@@ -113,12 +113,15 @@ case $runMode in
         mkdir -p $outdir/theZING
         for confint in $conflist; do
             for maxPts in $maxlist; do
-                for iterNumber in $ilist; do     
+                for iterNumber in $ilist; do  
                     if [[ $use_supercomputer -eq 1 ]]
                     then
                         sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer
                     else
+                        echo here1
+                        echo $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer
                         $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer
+                        echo here2
                     fi
                 done
             done
