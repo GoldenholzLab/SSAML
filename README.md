@@ -20,7 +20,7 @@ Information about the 3 external datasets we used:
     there is an assumed column called "ID" which has a unique ID number for each patient (multiple entries per patient ok)
     the columns assumed:'ID','szTF','AI','RMR'. One row per entry. This is a CSV file
 
-**dataTYPE=1**: COVA dataaset, single sample per patient, goal is number of EVENTS not PATIENTS
+**dataTYPE=1**: COVA dataset, single sample per patient, goal is number of EVENTS not PATIENTS
     we assume columns are present: ['actual','Prob-dead','Prob-ICU-MV','Prob-Hosp']
     the 'actual' column is the ground truth. The sum of the other Prob columns divided by 100 is assumed to be
     0 to 1 probability prediction. Of note, for our purposes we only used actual>0 as the outcome of interest.
@@ -29,7 +29,7 @@ Information about the 3 external datasets we used:
     this assumes a 'z','T',and 'C' columns. z is the z-score value, a covariate for Cox proportional hazard.
     T is time in years, and C is censored (1=yes, 0=no).
 
-**dataTYPE=3**: custom dataset, must be a csv file. You can specify the input file path and output directory in runner_power.sh around line 88, or spcify them in the command line input after runMode and dataTYPE.
+**dataTYPE=3**: custom dataset, must be a csv file. You can specify the input file path and output directory in runner_power.sh around line 88, or specify them in the command line input after runMode and dataTYPE.
 
 WHAT ARE THE IMPORTANT FILES:
 -------------------
@@ -38,7 +38,7 @@ WHAT ARE THE IMPORTANT FILES:
 This is a runner script that will submit a sequence of commands. If using a supercomputer, this
 script will submit multiple jobs.
 You will need to edit this script to submit the jobs that are relevant for your task.
-For example, if you want to use a supercomputer, change use_supercomputer to 1. It is set to 0 by default (ie no supercompyer)
+For example, if you want to use a supercomputer, change use_supercomputer to 1. It is set to 0 by default (ie. no supercomputer).
 
 2. run_power.sh
 
