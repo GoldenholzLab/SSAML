@@ -5,6 +5,8 @@ BA_For_Daniel.csv
 OUT*
 old*
 
+.ipynb_checkpoints/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

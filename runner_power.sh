@@ -8,32 +8,26 @@ A master runner script like this can be most helpful when using a supercomputer 
 because it can send a series of individual job requests in to the cluster.
 
 USAGE:
-runner_power.sh <runMode> <dataTYPE> (the following are only required for dataTYPE=3: <infile> <outdir>)
+runner_power.sh <runMode>
+Optional <paramsCONFIG> argument. runner_power.sh <runMode> <paramsCONFIG>
   runMode:
     1: used to submit a large batch of calculations
     2: used to summarize the large batch when they are done. Mode 3 will automatically run afterwards.
     3: used to produce the final output after mode 2 has summarized data.
-  dataTYPE:
-    0: ST dataset, with repeated samples from same patients, ID is already a field in the database, goal is PATIENTS
-    there is an assumed column called "szTF" which will be 1 for true and 0 for false, this will be ground truth
-    there is an assumed column called "AI" which will be a fraction 0 to 1 for the predicted value
-    there is an assumed column called "ID" which has a unique ID number for each patient (multiple entries per patient ok)
-    the columns assumed:'ID','szTF','AI','RMR'. One row per entry. This is a CSV file
-    1: COVA dataset, single sample per patient, goal is number of EVENTS not PATIENTS
-    we assume columns are present: ['actual','Prob-dead','Prob-ICU-MV','Prob-Hosp']
-    the 'actual' column is the ground truth. The sum of the other Prob columns divided by 100 is assumed to be 0 to 1 probability prediction
-    2: BAI dataset, longitudinal survival data, goal is number of PATIENTS
-    this assumes a 'z','T',and 'C' columns. z is the z-score value, a covariate for Cox proportional hazard.
-    T is time in years, and C is censored (1=yes, 0=no).
-    O MODIFY THIS RUNNER SCRIPT FOR YOUR OWN USE:
 
-First, determine what dataset type you have. If similar to one of the example datasets (ST, COVA, BAI), then you can use one of the dataTYPE shortcuts above. If not, define a different dataTYPE that sets the appropriate variables below in the section called **DATATYPE**."
+  paramsCONFIG:
+    0: DEFAULT. reads in the data with input path specified and formatted as described below, default power calculation parameters.
+    1: shortcut / saved parameter configuration for seizure tracking 'ST' dataset, as presented in the paper.
+    2: shortcut / saved parameter configuration for covid hospitalization risk prediction 'COVA' dataset, as presented in the paper.
+    3: shortcut / saved parameter configuration for brain age, longitudinal survival analysis datatset, as presented in the paper.
+
+MODIFY THIS RUNNER SCRIPT FOR YOUR OWN USE."
 exit
 fi
 
 # Input parameters
 runMode=$1
-dataTYPE=$2
+# Optional input parameters: paramsCONFIG=$2 (see below).
 
 # constants
 p=`pwd`
@@ -41,35 +35,71 @@ PYTHON=python  # this depends on which command do you run python, usually it's `
 
 # if 1 here, then submit jobs to a supercomputer. If 0 here, run commands locally
 use_supercomputer=0
-bootReps=2
 
-## *** DATATYPE ***  shortcut to set up variables for SSAML based on data type
+## 
 # Notes:
-#  infile - where your input file will be found
+#  infile - where your input file will be found. Data format expected as described in data_format_preprocess.ipynb, in short:
+#         a) for non-survival analysis: columns ['ID', 'event', 'p']
+#         b) for survival analysis: columns ['ID', 'C', 'T', 'z'].
 #  outdir - where output files should be saved
 #  peopleTF - 1 if patient based, 0 if event based
 #  survivalTF - 1 if survival analysis required, 0 if not
-#  resampReps - number of repitions to be performed by power.py
+#  resampReps - number of repitions (outer loop) to be performed by power.py (as Figure 1, block C in paper)
+#  bootReps - bootstrap repitions in inner loop (as Figure 1, block B in paper)
 #  ilist - a list of what iteration numbers to run, where each iteration has resampReps iterations within (between 0 and 9999)
-#  maxlist - a list of candidate number of patients/events to test for sample szie power (any size ok)
+#  maxlist - a list of candidate number of patients/events to test for sample size power (any size ok)
 #  conflist - a list of candidate confidence range (e.g. .95 = 95% confidence range) to test (any size ok)
-case $dataTYPE in
+
+case $# in
+    1)
+        echo here1
+        # no paramsCONFIG specified, proceed with default value 0.
+        paramsCONFIG=0
+        ;;
+    2)
+        # paramsCONFIG argument passed.
+        paramsCONFIG=$2
+        ;;
+    *)
+        printf "%b" "ERROR. Maximum 2 arguments <runMode> <paramsCONFIG> are accepted."
+        exit 1
+        ;;
+esac
+
+case $paramsCONFIG in
+# CONVENIENCE shortcuts/savings of parameter configurations
+# user with their own data can either use default power calculations parameters as set in case paramsCONFIG == 0 (and specify
+# input and output paths), or add a paramsCONFIG shortcut (either modifyting case 1-3 or adding cases 4+).
+
     0)
-        infile='/home/dmg16/deepMan/OUTPUT_for_paper/holdoutisThisReal_v2.csv'
-        outdir='/home/dmg16/SSAML/OUTst'
+        infile='SET_BY_USER'
+        outdir='SET_BY_USER'
         peopleTF=1
         survivalTF=0
         resampReps=40
+        bootReps=1000
+        ilist=`seq 0 1 99`
+        maxlist='500 1000 1500 2000'
+        conflist='0.955 0.997 0.9999 0.999999'
+        ;;
+    1)
+        infile='/home/wolfgang/repos/SSAML/sample_data_st.csv' # '/home/dmg16/deepMan/OUTPUT_for_paper/holdoutisThisReal_v2.csv'
+        outdir='/home/wolfgang/repos/SSAML/OUTst' # '/home/dmg16/SSAML/OUTst'
+        peopleTF=1 # seizure tracking analysis is done on subject level
+        survivalTF=0 # no survival analysis data
+        resampReps=40
+        bootReps=5
         ilist=`seq 0 1 24`
         maxlist='20 40 60 80'
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
-    1)
-        infile='/home/wolfgang/repos/SSAML/COVA-FAKE.csv' # '/Users/danisized/Documents/GitHub/SSAML/COVA-FAKE.csv'
+    2)
+        infile='/home/wolfgang/repos/SSAML/sample_data_cova.csv' # '/Users/danisized/Documents/GitHub/SSAML/COVA-FAKE.csv'
         outdir='/home/wolfgang/repos/SSAML/OUTcovaFAKE'  # '/Users/danisized/Documents/GitHub/SSAML/OUTcovaFAKE'
-        peopleTF=0
-        survivalTF=0
+        peopleTF=0 # covid risk analysis is done on event level
+        survivalTF=0 # no survival analysis data
         resampReps=10
+        bootReps=5 # 10000
         maxlist='40 50 60 70'
         ilist=`seq 0 1 10`
         #resampReps=40
@@ -77,31 +107,27 @@ case $dataTYPE in
         #ilist=`seq 0 1 24`
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
-    2)
-        infile='/home/dmg16/SSAML/BA_For_Daniel.csv'
-        outdir='/home/dmg16/SSAML/OUTbai'
-        peopleTF=1
-        survivalTF=1
-        resampReps=10
-        ilist=`seq 0 1 99`
-        maxlist='500 1000 1500 2000'
-        conflist='0.955 0.997 0.9999 0.999999'
-        ;;
     3)
-        infile=$3
-        outdir=$4
-        peopleTF=1
-        survivalTF=0
-        resampReps=40
+        infile='/home/wolfgang/repos/SSAML/sample_data_bai_mortality.csv' # '/home/dmg16/SSAML/BA_For_Daniel.csv'
+        outdir='/home/wolfgang/repos/SSAML/OUTbai' #'/home/dmg16/SSAML/OUTbai'
+        peopleTF=1 # brain age mortality analysis is done on subject level
+        survivalTF=1 # brain age mortality is a longitudinal, survival analysis dataset.
+        resampReps=10
+        bootReps=5
         ilist=`seq 0 1 99`
         maxlist='500 1000 1500 2000'
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     *)
-        echo "ERROR. No datatype specified."
+        echo "ERROR. No paramsCONFIG specified."
         exit 1
         ;;
 esac
+
+if [ ! -f "$infile" ]; then
+    echo "ERROR. Specified infile $infile does not exist."
+    exit 1
+fi
 
 # reset this for runMode 2 and 3
 iterNumber=0
@@ -117,10 +143,10 @@ case $runMode in
                 for iterNumber in $ilist; do  
                     if [[ $use_supercomputer -eq 1 ]]
                     then
-                        sbatch run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
+                        sbatch run_power.sh $runMode $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
                     else
-                        echo $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
-                        $p/run_power.sh $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
+                        echo $p/run_power.sh $runMode $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
+                        $p/run_power.sh $runMode $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $use_supercomputer $bootReps
                     fi
                 done
             done
@@ -140,8 +166,8 @@ case $runMode in
                     cat num${maxP}????_${confint}.csv > $FILE
                     mv num${maxP}????_${confint}.csv holder/
                 fi
-                echo "$PYTHON $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps"
-                $PYTHON $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+                echo "$PYTHON $p/power.py $runMode $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $bootReps"
+                $PYTHON $p/power.py $runMode $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $bootReps
                 fullResultName="full${maxP}_${confint}.csv"
                 head -n 1 $fullResultName >> RWD_${confint}.txt
                 head -n 2 $fullResultName | tail -n 1 >> BIAS_${confint}.txt
@@ -158,14 +184,14 @@ case $runMode in
         cd $outdir
         maxPts=0
         confint=0
-        $PYTHON $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+        $PYTHON $p/power.py $runMode $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $bootReps
         ;;
     3)
         runMode=3
         cd $outdir
         maxPts=0
         confint=0
-        $PYTHON $p/power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+        $PYTHON $p/power.py $runMode $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $bootReps
         ;;
     *)
         echo "ERROR. Only runMode 1,2,3 are allowed."
