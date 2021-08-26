@@ -6,13 +6,11 @@
 # Daniel Goldenholz, MD, PhD
 
 # USAGE:
-#power.py <runMode> <dataTYPE> <iterNumber> <maxPts> <confint> <infile> <outdir> <peopleTF> <survivalTF> <resampReps>
+#power.py <runMode> <iterNumber> <maxPts> <confint> <infile> <outdir> <peopleTF> <survivalTF> <resampReps> <bootReps>
 # runMode - the mode we are running
 #  = 1 iterate
 #  = 2 summarize the local iterations
 #  = 3 global summary
-# dataTYPE = 0 for ST type database. 1 for COVA, 2 for BAI, 3 for anything else.
-#      note: 0,1 and 2 will override the peopleTF and survivalTF options.
 # iterNumber - the iteration number to run (between 0 and 9999)
 # maxPts - how many patients are available in total
 # confint - the confidence interval to compute (eg 0.995, .997 etc)
@@ -21,6 +19,7 @@
 # peopleTF -- 1 means you want people. 0 means you want EVENTS.
 # survivalTF - 0 if no survival stats, 1 if survival based stats
 # resampReps = 40 if not listed, but how many outter reps to do
+# bootReps = 1000 if not listed, how many inner reps to do
 
 # First load up the libraries needed
 # this for drawing headless
@@ -414,8 +413,10 @@ if runMode==3:
   # Use summary data to print and plot
 
   x = pd.read_csv('conflist.setup',delimiter=' ',header=None)
+  assert x.shape[0] > 0, "No rows in input conflist.setu file detected. Check if file is empty or wrongly formatted."
   clist=np.array(x.iloc[0,])
-  x = pd.read_csv("RWD_0.955.txt",delimiter=',',header=None)
+
+  x = pd.read_csv('RWD_' + str(clist[0]) +'.txt',delimiter=',',header=None)
   x.columns = ['howmany','confint','RDW slope','RWD C-index','RWD CIL']
   numLIST = np.array(x.howmany)
   numLIST = numLIST.astype(int)
@@ -432,6 +433,7 @@ if runMode==3:
     ALL = showSummary('RWD' + '_' + str(confint) + '.txt','BIAS' + '_' + str(confint) + '.txt','COVP' + '_' + str(confint) + '.txt',numLIST,ALL,survivalTF)
   print('The frankenstein is...')
   print(ALL)
+  print('The columnn with numbers (i.e. no NaN values) represents the lowest sample size selected by SSAML.')
   plotZING('smallZ',numLIST,survivalTF)
 
 # in case record keeping is important for supercomputer time, report the run duration here

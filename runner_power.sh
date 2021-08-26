@@ -88,7 +88,7 @@ case $paramsCONFIG in
         peopleTF=1 # seizure tracking analysis is done on subject level
         survivalTF=0 # no survival analysis data
         resampReps=40
-        bootReps=5
+        bootReps=1000
         ilist=`seq 0 1 24`
         maxlist='20 40 60 80'
         conflist='0.955 0.997 0.9999 0.999999'
@@ -98,8 +98,8 @@ case $paramsCONFIG in
         outdir='/home/wolfgang/repos/SSAML/OUTcovaFAKE'  # '/Users/danisized/Documents/GitHub/SSAML/OUTcovaFAKE'
         peopleTF=0 # covid risk analysis is done on event level
         survivalTF=0 # no survival analysis data
-        resampReps=10
-        bootReps=5 # 10000
+        resampReps=100
+        bootReps=1000 # 10000
         maxlist='40 50 60 70'
         ilist=`seq 0 1 10`
         #resampReps=40
@@ -113,7 +113,7 @@ case $paramsCONFIG in
         peopleTF=1 # brain age mortality analysis is done on subject level
         survivalTF=1 # brain age mortality is a longitudinal, survival analysis dataset.
         resampReps=10
-        bootReps=5
+        bootReps=1000
         ilist=`seq 0 1 99`
         maxlist='500 1000 1500 2000'
         conflist='0.955 0.997 0.9999 0.999999'
