@@ -10,9 +10,9 @@ for Nfeat in 10 100; do
             # specify paths
             infile=/data/HaoqiSun/SSAML/datasets/simulated_dataset_classfication_Nfeat${Nfeat}_classratio${classratio}_flipy${flipy}_randomseed2020.csv
             outfolder=/data/HaoqiSun/SSAML/github/simulation/OUTsimulation_Nfeat${Nfeat}_classratio${classratio}_flipy${flipy}_randomseed2020
-            # run mode 1 and mode 2 with datatype=3 (custom)
-            ./runner_power.sh 1 3 $infile $outfolder
-            ./runner_power.sh 2 3 $infile $outfolder
+            # run mode 1 and mode 2 with datatype=0 (custom)
+            ./runner_power.sh 1 0 $infile $outfolder
+            ./runner_power.sh 2 0 $infile $outfolder
             ((cc=cc+1))
         done
     done
