@@ -11,16 +11,16 @@
 
 
 runMode=$1
-dataTYPE=$2
-iterNumber=$3
-maxPts=$4
-confint=$5
-infile=$6
-outdir=$7
-peopleTF=$8
-survivalTF=$9
-resampReps=${10}
-use_supercomputer=${11}
+iterNumber=$2
+maxPts=$3
+confint=$4
+infile=$5
+outdir=$6
+peopleTF=$7
+survivalTF=$8
+resampReps=${9}
+use_supercomputer=${10}
+bootReps=${11}
 
 if [[ $use_supercomputer -eq 1 ]]
 then
@@ -30,4 +30,4 @@ then
 
     cd /home/dmg16/SSAML
 fi
-python -u power.py $runMode $dataTYPE $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps
+python -u power.py $runMode $iterNumber $maxPts $confint $infile $outdir $peopleTF $survivalTF $resampReps $bootReps

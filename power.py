@@ -43,31 +43,28 @@ from tqdm import tqdm   # for showing progress bar
 
 
 # INPUT PARAMETERS
-if (len(sys.argv)<8):
-  print('Need at least 7 args!')
+if (len(sys.argv)<7):
+  print('Need at least 6 args!')
   exit()
 runMode = int(sys.argv[1])
-dataTYPE = int(sys.argv[2])
-iterNumber = int(sys.argv[3])
-maxPts = int(sys.argv[4])
+iterNumber = int(sys.argv[2])
+maxPts = int(sys.argv[3])
 #confint options 0.95, 0.99, 0.999,...
-confint = float(sys.argv[5])
-big_file = sys.argv[6]
-mydir= sys.argv[7]
+confint = float(sys.argv[4])
+big_file = sys.argv[5]
+mydir= sys.argv[6]
 # set some defaults if not all params available
-if (len(sys.argv)>8):
-  peopleTF = int(sys.argv[8])==1
-  survivalTF = int(sys.argv[9]) == 1
-  resampReps = int(sys.argv[10])
+if (len(sys.argv)>7):
+  peopleTF = int(sys.argv[7])==1
+  survivalTF = int(sys.argv[8]) == 1
+  resampReps = int(sys.argv[9])
+  bootReps = int(sys.argv[10])
+
 else:
   peopleTF = True
   survivalTF = False
   resampReps = 40
-
-# dataTYPE:
-# 0: ST dataset, with repeated samples from same patients, ID is already a field in the database, goal is PATIENTS
-# 1: COVA dataaset, single sample per patient, goal is number of EVENTS not PATIENTS
-# 2: BAI dataset, longitudinal survival data, goal is number of PATIENTS
+  bootReps = 1000
 
 print('Running mode %d with survivalTF=%r peopleTF=%r iteration %d, maxpts %d, CI: %0.6f, resampReps=%d' % (runMode,survivalTF,peopleTF,iterNumber,maxPts,confint,resampReps))
 print('Input file = %s' % big_file)
@@ -75,7 +72,6 @@ print('Output directory = %s' % mydir)
 
 # GLOBAL CONSTANT DEFINITIONS
 withReplacement = True
-bootReps=1000
 # this flag is for doing ZING files that produces a figure. It makes more files, and therefore is optional.
 doEXTRA=True
 # if you want runMode 1 to run using parallel processing, set this to True, and n_jobs as needed
@@ -377,40 +373,27 @@ def plotZING(prefixN,numLIST,survivalTF):
 
 
 # MAIN
-# prepare big file
+
 T1= time.time()
 os.chdir(mydir)
 
-# Set up variables based on datatype requested
-if dataTYPE==0:
-  # ST datafile
-  c = pd.read_csv(big_file,sep=',',names=['ID','szTF','AI','RMR'])
-  uids = pd.unique(c.ID)
-  c.rename(columns={'szTF':'event'},inplace=True)
-  c.rename(columns={'AI':'p'},inplace=True)
-  peopleTF=True
-  survivalTF=False
-elif dataTYPE==1:
-  # COVA datafile
-  c = pd.read_csv(big_file,sep=',')
-  uids = np.array(range(c.shape[0]))
-  c['ID'] = uids
-  AInames= ['Prob-dead','Prob-ICU-MV','Prob-Hosp']
-  c['p'] = (c[AInames[0]] + c[AInames[1]] + c[AInames[2]])/100
-  c['event'] = 0.0 + (c['actual']>0)
-  peopleTF=False
-  survivalTF=False
-elif dataTYPE==2:
-  c = pd.read_csv(big_file,sep=',')
-  uids =  uids = np.array(range(c.shape[0]))
-  c['ID'] = uids
-  peopleTF=True
-  survivalTF=True
-else:
-  c = pd.read_csv(big_file,sep=',')
-  uids = np.array(range(c.shape[0]))
-  c['ID'] = uids
+# read in data file and check format requirements.
+c = pd.read_csv(big_file, sep=',')
+assert c.shape[0] > 0, "No rows in input csv file detected. Check if file is empty or wrongly formatted."
 
+if survivalTF:
+  cols_required = ['ID', 'T', 'C', 'z']
+  assert all(np.isin(cols_required, c.columns)), f"Survival analysis type of data specified (survivalTF==True), \
+  input file does not contain required columns (required: {cols_required}, contained: {c.columns}."
+
+  assert peopleTF==1, "For survival analysis type of data (survivalTF==True), peopleTF==1 is expected."
+
+else:
+  cols_required = ['ID', 'event', 'p']
+  assert all(np.isin(cols_required, c.columns)), f"Non-survival analysis type of data specified (survivalTF==False), \
+  input file does not contain required columns (required: {cols_required}, contained: {c.columns}."
+
+uids = pd.unique(c.ID)
 howmany = maxPts
 
 if runMode==1:
