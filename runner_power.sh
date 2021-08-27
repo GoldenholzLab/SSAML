@@ -28,6 +28,18 @@ runner_power.sh <runMode> <paramsCONFIG>
 MODIFY THIS RUNNER SCRIPT FOR YOUR OWN USE."
 }
 
+HelpParameters()
+{
+echo "
+In runner_power, user has to set the filepath to the dataset to be analyzed, and the output directory. Further, SSAML parameters can be specified:  
+-- peopleTF: 1 if patient based, 0 if event based. (default 1)  
+-- survivalTF: 1 for survival analysis/dataset, 0 if not (default 0).  
+-- resampReps: number of repitions (outer loop) to be performed (default 1000).  
+-- bootReps: bootstrap repitions in inner loop (default 40)  
+"
+}
+
+
 if [ $# -eq 0 ]; then
 Help
 exit
@@ -37,6 +49,7 @@ while getopts ":h" option; do
    case $option in
       h) # display Help
          Help
+         HelpParameters
          exit;;
    esac
 done
