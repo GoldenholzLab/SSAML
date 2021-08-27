@@ -83,8 +83,8 @@ case $paramsCONFIG in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     1)
-        infile='/home/wolfgang/repos/SSAML/sample_data_st.csv' # '/home/dmg16/deepMan/OUTPUT_for_paper/holdoutisThisReal_v2.csv'
-        outdir='/home/wolfgang/repos/SSAML/OUTst' # '/home/dmg16/SSAML/OUTst'
+        infile='/home/wolfgang/repos/SSAML/sample_data_st.csv'
+        outdir='/home/wolfgang/repos/SSAML/OUTst'
         peopleTF=1 # seizure tracking analysis is done on subject level
         survivalTF=0 # no survival analysis data
         resampReps=40
@@ -94,12 +94,12 @@ case $paramsCONFIG in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     2)
-        infile='/home/wolfgang/repos/SSAML/sample_data_cova.csv' # '/Users/danisized/Documents/GitHub/SSAML/COVA-FAKE.csv'
-        outdir='/home/wolfgang/repos/SSAML/OUTcovaFAKE'  # '/Users/danisized/Documents/GitHub/SSAML/OUTcovaFAKE'
+        infile='/home/wolfgang/repos/SSAML/sample_data_cova.csv'
+        outdir='/home/wolfgang/repos/SSAML/OUTcovaFAKE'
         peopleTF=0 # covid risk analysis is done on event level
         survivalTF=0 # no survival analysis data
         resampReps=100
-        bootReps=1000 # 10000
+        bootReps=1000
         maxlist='40 50 60 70'
         ilist=`seq 0 1 10`
         #resampReps=40
@@ -108,8 +108,8 @@ case $paramsCONFIG in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     3)
-        infile='/home/wolfgang/repos/SSAML/sample_data_bai_mortality.csv' # '/home/dmg16/SSAML/BA_For_Daniel.csv'
-        outdir='/home/wolfgang/repos/SSAML/OUTbai' #'/home/dmg16/SSAML/OUTbai'
+        infile='/home/wolfgang/repos/SSAML/sample_data_bai_mortality.csv'
+        outdir='/home/wolfgang/repos/SSAML/OUTbai'
         peopleTF=1 # brain age mortality analysis is done on subject level
         survivalTF=1 # brain age mortality is a longitudinal, survival analysis dataset.
         resampReps=10
