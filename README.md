@@ -105,5 +105,5 @@ Mini-Tutorial
 You can test the SSAML code with the COVA-FAKE.csv data. Simply modify infile path (line 99) to the COVA-FAKE.csv data, set an arbitrary outdir path (line 100) and run the code:  
 runner_power.sh 1  
 runner_power.sh 2  
-To speed things up, you can also reduce the number of outer loops (parameter bootReps, line 1000) temporarily.
+To speed things up, you can also reduce the number of outer loops (parameter bootReps, line 104) temporarily.
 
