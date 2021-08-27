@@ -13,6 +13,9 @@ HOW TO USE THIS TOOL:
 3. Optional: If you have supercomputer/parallel processing capabilities: edit run_power.sh.
 4. Optional: If you have parallel processing capabilities, you can set the flag called do_parallel in power.py to True.
 5. Execute runner_power.sh with runMode=1, followed by runMode=2 to obtain SSAML results.
+6. The output of SSAML will be a data table. Each column will represent a number of patients or events. The 
+    first column with numbers displayed (as opposed to NaN) will be smallest number of patients/events that will
+    satisfy the SSAML requirements, and therefore will be the number of patients or events needed for appropriate validation.
 
 In runner_power, user has to set the filepath to the dataset to be analyzed, and the output directory. Further, SSAML parameters can be specified:  
 -- peopleTF: 1 if patient based, 0 if event based. (default 1)  
@@ -29,7 +32,7 @@ In runner_power, user can also save/shortcut specific filepath and parameter set
 
 DATA PREPARATION
 -------------------
-The format of the .csv file expected by the AASM code differs slightly for non-survival-analysis and survival-analysis tasks:
+The format of the .csv file expected by the SSAML code differs slightly for non-survival-analysis and survival-analysis tasks:
 
 ##### 'regular', non-survival analysis model.  
 columns:  

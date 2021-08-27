@@ -60,26 +60,29 @@ if (len(sys.argv)>7):
   bootReps = int(sys.argv[10])
 
 else:
+  # in this case, parameters were not given, so use assumed default values
   peopleTF = True
   survivalTF = False
   resampReps = 40
   bootReps = 1000
 
-print('Running mode %d with survivalTF=%r peopleTF=%r iteration %d, maxpts %d, CI: %0.6f, resampReps=%d' % (runMode,survivalTF,peopleTF,iterNumber,maxPts,confint,resampReps))
+print('Running mode %d with survivalTF=%r peopleTF=%r iteration %d, maxpts %d, CI: %0.6f, resampReps=%d, bootReps=%d' % (runMode,survivalTF,peopleTF,iterNumber,maxPts,confint,resampReps,bootReps))
 print('Input file = %s' % big_file)
 print('Output directory = %s' % mydir)
 
 # GLOBAL CONSTANT DEFINITIONS
+# the double bootstrapping of SSAML is always done with replacement. If you feel that this should be
+# without replacement, change this flag below.
 withReplacement = True
 # this flag is for doing ZING files that produces a figure. It makes more files, and therefore is optional.
 doEXTRA=True
-# if you want runMode 1 to run using parallel processing, set this to True, and n_jobs as needed
+# if you want runMode 1 to run using parallel processing on a single computer, set this to True, and n_jobs as needed
 do_parallel=False
 n_jobs=1
 
 # FUNCTION DEFINITIONS
 
-def runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF):
+def runOneSet_inner(N,uids,c,bootReps,withReplacement,peopleTF,survivalTF):
   # This is a subfunctoin of runOneSet, used to assist with parallel processing when available
   # inputs are derived from runOneSet
 
@@ -126,9 +129,9 @@ def runOneSet(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint
   # The inner loop is run by the subfunction runOneSet_inner to facilitate parallel processing if available/desired.
   if do_parallel:
     with Parallel(n_jobs=n_jobs, verbose=False) as par:
-      resultXs = par(delayed(runOneSet_inner)(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF) for resamp in tqdm(range(resampReps)))
+      resultXs = par(delayed(runOneSet_inner)(N,uids,c,bootReps,withReplacement,peopleTF,survivalTF) for resamp in tqdm(range(resampReps)))
   else:
-    resultXs = [runOneSet_inner(N,uids,c,resampReps,bootReps,fName,withReplacement,doEXTRA,confint,peopleTF,survivalTF) for resamp in tqdm(range(resampReps))]
+    resultXs = [runOneSet_inner(N,uids,c,bootReps,withReplacement,peopleTF,survivalTF) for resamp in tqdm(range(resampReps))]
 
   # now that the outer loop is done, store the result of each outer loop as a line in an output file f
   for resultX in resultXs:
