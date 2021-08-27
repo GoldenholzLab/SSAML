@@ -1,6 +1,8 @@
 #!/bin/bash
-# if only type in runner_power, the usage is printed
-if [ $# -eq 0 ]; then
+# if only type in runner_power, or runner_power-h, the usage is printed
+
+Help()
+{
 echo "This is the master runner script for SSAML.
 From here, you will define where your data is. You will also specify what data type you have
 and various parameters of SSAML to run.
@@ -9,25 +11,48 @@ because it can send a series of individual job requests in to the cluster.
 
 USAGE:
 runner_power.sh <runMode>
-Optional <paramsCONFIG> argument. runner_power.sh <runMode> <paramsCONFIG>
+or optional:
+runner_power.sh <runMode> <paramsCONFIG>
+
   runMode:
     1: used to submit a large batch of calculations
     2: used to summarize the large batch when they are done. Mode 3 will automatically run afterwards.
     3: used to produce the final output after mode 2 has summarized data.
 
-  paramsCONFIG:
-    0: DEFAULT. reads in the data with input path specified and formatted as described below, default power calculation parameters.
+  paramsCONFIG (optional):
+    0: DEFAULT. reads in the data with input path specified and formatted as described in ReadMe.md, default power calculation parameters.
     1: shortcut / saved parameter configuration for seizure tracking 'ST' dataset, as presented in the paper.
     2: shortcut / saved parameter configuration for covid hospitalization risk prediction 'COVA' dataset, as presented in the paper.
     3: shortcut / saved parameter configuration for brain age, longitudinal survival analysis datatset, as presented in the paper.
 
 MODIFY THIS RUNNER SCRIPT FOR YOUR OWN USE."
+}
+
+if [ $# -eq 0 ]; then
+Help
 exit
 fi
+
+while getopts ":h" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit;;
+   esac
+done
+
 
 # Input parameters
 runMode=$1
 # Optional input parameters: paramsCONFIG=$2 (see below).
+
+re='^[0-9]+$'
+if ! [[ $runMode =~ $re ]] ; then
+   echo "ERROR. Argument 1 <runMode> needs to be an integer {1, 2, 3}." >&2; exit 1
+fi
+if (($runMode < 1 || $runMode > 3)); then
+  echo "ERROR. Argument 1 <runMode> needs to be an integer {1, 2, 3}." >&2; exit 1
+fi
 
 # constants
 p=`pwd`
@@ -52,7 +77,6 @@ use_supercomputer=0
 
 case $# in
     1)
-        echo here1
         # no paramsCONFIG specified, proceed with default value 0.
         paramsCONFIG=0
         ;;
@@ -119,7 +143,7 @@ case $paramsCONFIG in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     *)
-        echo "ERROR. No paramsCONFIG specified."
+        echo "ERROR. Invalid paramsCONFIG specified."
         exit 1
         ;;
 esac
