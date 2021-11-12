@@ -75,7 +75,7 @@ print('Output directory = %s' % mydir)
 # without replacement, change this flag below.
 withReplacement = True
 # this flag is for doing ZING files that produces a figure. It makes more files, and therefore is optional.
-doEXTRA=True
+doEXTRA=False
 # if you want runMode 1 to run using parallel processing on a single computer, set this to True, and n_jobs as needed
 do_parallel=False
 n_jobs=1
@@ -420,7 +420,7 @@ if runMode==3:
   clist=np.array(x.iloc[0,])
 
   x = pd.read_csv('RWD_' + str(clist[0]) +'.txt',delimiter=',',header=None)
-  x.columns = ['howmany','confint','RDW slope','RWD C-index','RWD CIL']
+  x.columns = ['howmany','confint','RWD slope','RWD C-index','RWD CIL']
   numLIST = np.array(x.howmany)
   numLIST = numLIST.astype(int)
 
@@ -431,7 +431,7 @@ if runMode==3:
   else:
     useme = 'AUC'
 
-  ALL = pd.DataFrame(temp,index=['confint','RDW slope','RWD ' + useme,'RWD CIL','BIAS slope','BIAS ' + useme,'BIAS CIL','COVP slope','COVP ' + useme,'COVP CIL'],columns=numLIST)
+  ALL = pd.DataFrame(temp,index=['confint','RWD slope','RWD ' + useme,'RWD CIL','BIAS slope','BIAS ' + useme,'BIAS CIL','COVP slope','COVP ' + useme,'COVP CIL'],columns=numLIST)
   for confint in reversed(clist):
     ALL = showSummary('RWD' + '_' + str(confint) + '.txt','BIAS' + '_' + str(confint) + '.txt','COVP' + '_' + str(confint) + '.txt',numLIST,ALL,survivalTF)
   print('The frankenstein is...')

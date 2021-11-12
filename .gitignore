@@ -2,9 +2,12 @@
 holdoutisThisReal_v2.csv
 risk_7day-simplified.csv
 BA_For_Daniel.csv
+x10k_rmr.csv
+x10k.csv
 OUT*
 old*
-
+runner_power_Aim2.sh
+aim2_out/
 .ipynb_checkpoints/
 
 # Byte-compiled / optimized / DLL files
