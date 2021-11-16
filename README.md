@@ -10,6 +10,7 @@ HOW TO USE THIS TOOL:
 -------------------
 1. Preprocess: Prepare your dataset, SSAML expects a .csv file with certain column names (see below).
 2. Edit runner_power: data filepath, specify SSAML parameters.
+Look for the section "***** YOU WILL DO YOUR EDITING HERE"
 3. Optional: If you have supercomputer/parallel processing capabilities: edit run_power.sh.
 4. Optional: If you have parallel processing capabilities, you can set the flag called do_parallel in power.py to True.
 5. Execute runner_power.sh with runMode=1, followed by runMode=2 to obtain SSAML results.
@@ -105,8 +106,8 @@ We did not provide the true COVA file because it was derived from protected heal
 
 Mini-Tutorial
 --------------------
-You can test the SSAML code with the COVA-FAKE.csv data. Simply modify infile path (line 99) to the COVA-FAKE.csv data, set an arbitrary outdir path (line 100) and run the code:  
-runner_power.sh 1  
-runner_power.sh 2  
-To speed things up, you can also reduce the number of outer loops (parameter bootReps, line 104) temporarily.
+You can test the SSAML code with the COVA-FAKE.csv data. Simply modify infile path  to the COVA_FAkE.csv data (search for "This is for a COVA type dataset" to see where this needs to be edited in runner_power.sh), set an arbitrary outdir path (note - you will need to create an output directory and give the path in outdir) and run the code:  
+runner_power.sh 1 2
+runner_power.sh 2 2
+To speed things up, you can also reduce the number of outer loops (parameter bootReps) temporarily.
 

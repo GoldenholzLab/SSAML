@@ -104,6 +104,7 @@ case $# in
 esac
 
 case $paramsCONFIG in
+# ***** YOU WILL DO YOUR EDITING HERE, MOST LIKELY FOR CASE 0
 # CONVENIENCE shortcuts/savings of parameter configurations
 # user with their own data can either use default power calculations parameters as set in case paramsCONFIG == 0 (and specify
 # input and output paths), or add a paramsCONFIG shortcut (either modifyting case 1-3 or adding cases 4+).
@@ -120,6 +121,8 @@ case $paramsCONFIG in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     1)
+        # This is for a ST type dataset, with repeated measures in a time series
+        # and multiple subjects
         infile='/home/wolfgang/repos/SSAML/sample_data_st.csv'
         outdir='/home/wolfgang/repos/SSAML/OUTst'
         peopleTF=1 # seizure tracking analysis is done on subject level
@@ -131,6 +134,9 @@ case $paramsCONFIG in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     2)
+        # This is for a COVA type dataset, with single measures for each patient
+        # and multiple patients. No survival analysis here. The analysis is to
+        # determine the number of EVENTS, not number of PATIENTS.
         infile='/home/wolfgang/repos/SSAML/sample_data_cova.csv'
         outdir='/home/wolfgang/repos/SSAML/OUTcovaFAKE'
         peopleTF=0 # covid risk analysis is done on event level
@@ -145,6 +151,8 @@ case $paramsCONFIG in
         conflist='0.955 0.997 0.9999 0.999999'
         ;;
     3)
+        # This is for a BAI type dataset, with single measures for each patient
+        # and a survival analysis conducted.
         infile='/home/wolfgang/repos/SSAML/sample_data_bai_mortality.csv'
         outdir='/home/wolfgang/repos/SSAML/OUTbai'
         peopleTF=1 # brain age mortality analysis is done on subject level
