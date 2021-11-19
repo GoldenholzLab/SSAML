@@ -77,8 +77,8 @@ withReplacement = True
 # this flag is for doing ZING files that produces a figure. It makes more files, and therefore is optional.
 doEXTRA=False
 # if you want runMode 1 to run using parallel processing on a single computer, set this to True, and n_jobs as needed
-do_parallel=False
-n_jobs=1
+do_parallel=True
+n_jobs=4
 
 # FUNCTION DEFINITIONS
 
@@ -266,7 +266,7 @@ def printConf(arrX,ind,f,firstTF,cutoff):
 
 def getSummary(fName,fullResultName,trueX,howmany,confint):
   # Read the CVS file which has all raw data.
-  # Then compute RDW, BIAS and COVP for each of the 3 metrics (AUC, c-index, CIL)
+  # Then compute RWD, BIAS and COVP for each of the 3 metrics (AUC, c-index, CIL)
   # Then output howmany patient/event, the confidence interval, ave. RWD, ave BIAS and COVP to fullFresultName
   # trueX is the ground truth for each metric used for comparison
 
@@ -276,10 +276,10 @@ def getSummary(fName,fullResultName,trueX,howmany,confint):
   for subSCORE in range(3):
     theTrue = trueX[subSCORE]
     theThree = np.array(P1.iloc[:,(3*subSCORE):(3*subSCORE+3)])
-    # RDW: get ave RDW. RDW = CI / true
-    rdws = np.array((theThree[:,2] - theThree[:,1])/theTrue)
-    ave_rdw = np.mean(rdws[np.isfinite(rdws)])
-    #ave_rdw = np.average(rdws)
+    # RWD: get ave RWD. RWD = CI / true
+    rwds = np.array((theThree[:,2] - theThree[:,1])/theTrue)
+    ave_rwd = np.mean(rwds[np.isfinite(rwds)])
+    #ave_rwd = np.average(rwds)
     # BIAS: get ave BIAS. BIAS = (true - est)/true
     biases = np.array((theTrue - theThree[:,0])/theTrue)
     #ave_bias = np.average(biases)
@@ -291,7 +291,7 @@ def getSummary(fName,fullResultName,trueX,howmany,confint):
     COVP = np.mean(TFs[np.isfinite(TFs)])
     #COVP = np.average(TFs)    
 
-    full_result[:,subSCORE+2] = [ave_rdw,ave_bias,COVP]
+    full_result[:,subSCORE+2] = [ave_rwd,ave_bias,COVP]
 
   # only 3 digits interesting
   full_result = np.floor(1000*full_result) / 1000
@@ -317,7 +317,7 @@ def showSummary(rwd,bias,covp,numLIST,oldALL,survivalTF):
   C = pd.read_csv(covp,delimiter=',',header=None)
 
   # Compose a pandas dataframe
-  R.columns = ['howmany','confint','RDW slope','RWD ' + useme,'RWD CIL']
+  R.columns = ['howmany','confint','RWD slope','RWD ' + useme,'RWD CIL']
   numLIST = R['howmany']
   R = R.drop('howmany',axis=1)
   B.columns = ['howmany','confint','BIAS slope','BIAS ' + useme,'BIAS CIL']
@@ -437,7 +437,11 @@ if runMode==3:
   print('The frankenstein is...')
   print(ALL)
   print('The columnn with numbers (i.e. no NaN values) represents the lowest sample size selected by SSAML.')
-  plotZING('smallZ',numLIST,survivalTF)
+  try:
+    plotZING('smallZ',numLIST,survivalTF)
+  except:
+    print('Plot ZING files not performed.')
+  
 
 # in case record keeping is important for supercomputer time, report the run duration here
 T2 = time.time()

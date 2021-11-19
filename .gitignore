@@ -7,6 +7,7 @@ x10k.csv
 OUT*
 old*
 runner_power_Aim2.sh
+runner_power-FAKE.sh
 aim2_out/
 .ipynb_checkpoints/
 

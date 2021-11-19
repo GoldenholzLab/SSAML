@@ -106,7 +106,7 @@ We did not provide the true COVA file because it was derived from protected heal
 
 Mini-Tutorial
 --------------------
-You can test the SSAML code with the COVA-FAKE.csv data. Simply modify infile path  to the COVA_FAkE.csv data (search for "This is for a COVA type dataset" to see where this needs to be edited in runner_power.sh), set an arbitrary outdir path (note - you will need to create an output directory and give the path in outdir) and run the code:  
+You can test the SSAML code with the sample_data_cova.csv data. Simply modify infile path to the sample_data_cova.csv data (search for "This is for a COVA type dataset" to see where this needs to be edited in runner_power.sh), set an arbitrary outdir path (note - you will need to create an output directory and give the path in outdir) and run the code:  
 runner_power.sh 1 2
 runner_power.sh 2 2
 To speed things up, you can also reduce the number of outer loops (parameter bootReps) temporarily.
