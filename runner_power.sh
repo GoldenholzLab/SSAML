@@ -110,15 +110,25 @@ case $paramsCONFIG in
 # input and output paths), or add a paramsCONFIG shortcut (either modifyting case 1-3 or adding cases 4+).
 
     0)
-        infile='SET_BY_USER'
-        outdir='SET_BY_USER'
+        ## THIS IS THE SET_BY_USER section ****
+        infile='/Users/danisized/Documents/GitHub/SSAML/sample_data_FAKE.csv'
+        outdir='/Users/danisized/Documents/GitHub/SSAML/OUTcovaFAKE'
         peopleTF=1
-        survivalTF=0
-        resampReps=40
-        bootReps=1000
-        ilist=`seq 0 1 99`
-        maxlist='500 1000 1500 2000'
-        conflist='0.955 0.997 0.9999 0.999999'
+        survivalTF=0 # no survival analysis data
+        resampReps=20 
+        bootReps=50  # this should be 1000, but that takes a long time!
+        maxlist='100 500 1000'
+        ilist=`seq 0 1 4`
+        conflist='0.955 0.999999'
+        #infile='SET_BY_USER'
+        #outdir='SET_BY_USER'
+        #peopleTF=1
+        #survivalTF=0
+        #resampReps=40
+        #bootReps=1000
+        #ilist=`seq 0 1 99`
+        #maxlist='500 1000 1500 2000'
+        #conflist='0.955 0.997 0.9999 0.999999'
         ;;
     1)
         # This is for a ST type dataset, with repeated measures in a time series
@@ -181,6 +191,7 @@ case $runMode in
     1)
         # This is runMode 1 - submit batches of scripts here (several hours)
         runMode=1
+        mkdir -p $outdir/
         mkdir -p $outdir/holder
         mkdir -p $outdir/theZING
         for confint in $conflist; do

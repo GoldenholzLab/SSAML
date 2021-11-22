@@ -75,7 +75,7 @@ print('Output directory = %s' % mydir)
 # without replacement, change this flag below.
 withReplacement = True
 # this flag is for doing ZING files that produces a figure. It makes more files, and therefore is optional.
-doEXTRA=False
+doEXTRA=True
 # if you want runMode 1 to run using parallel processing on a single computer, set this to True, and n_jobs as needed
 do_parallel=True
 n_jobs=4

@@ -106,8 +106,8 @@ We did not provide the true COVA file because it was derived from protected heal
 
 Mini-Tutorial
 --------------------
-You can test the SSAML code with the sample_data_cova.csv data. Simply modify infile path to the sample_data_cova.csv data (search for "This is for a COVA type dataset" to see where this needs to be edited in runner_power.sh), set an arbitrary outdir path (note - you will need to create an output directory and give the path in outdir) and run the code:  
-runner_power.sh 1 2
-runner_power.sh 2 2
-To speed things up, you can also reduce the number of outer loops (parameter bootReps) temporarily.
-
+To try the SSAML code yourself on a reasonably fast desktop computer, try the
+Jupyter notebook work_out_eamxple.ipynb. There you will build a fake dataefile,
+adjust the runner_power.sh file, run it, and then get an output table, as well
+as an optional graphic. The total time to run this example on a modern desktop
+computer should take roughly 10-15 minutes.
