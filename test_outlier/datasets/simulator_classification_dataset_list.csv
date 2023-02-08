@@ -1,0 +1,4 @@
+OutlierPerc,RandomSeed,Nfeat,ClassRatio,FlipYProb,Path
+0,2023,100,1,0.1,datasets/simulated_dataset_classfication_outlier_perc0.csv
+5,2023,100,1,0.1,datasets/simulated_dataset_classfication_outlier_perc5.csv
+10,2023,100,1,0.1,datasets/simulated_dataset_classfication_outlier_perc10.csv
