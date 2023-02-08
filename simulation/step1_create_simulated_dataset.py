@@ -25,8 +25,8 @@ class_ratios = [1, 10, 100]   # class 1:2 ratio
 flip_ys = [0.01, 0.1, 0.2]    # probability of flipping class
 
 # regression specific
-effective_rank_percs = [0.1, 0.5]  # degree of colinearity
-reg_noises = [0.1, 1, 10]            # variance of gaussian noise added
+#effective_rank_percs = [0.1, 0.5]  # degree of colinearity
+#reg_noises = [0.1, 1, 10]            # variance of gaussian noise added
 
 
 # generate simulated datasets
