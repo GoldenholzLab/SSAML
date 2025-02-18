@@ -31,7 +31,7 @@ def showSummary(rwd,bias,covp,numLIST,oldALL,survivalTF):
     ALL = pd.concat([R,B,C],axis=1)
     ALL.index = numLIST
 
-    print('RWD goal < 0.5, BIAS goal < 5%, COVP < 95%')
+    print('RWD goal < 0.5, BIAS goal < 5%, COVP > 95%')
     print(ALL.transpose())
 
     ALL[ALL['COVP slope']<0.95] = np.nan

@@ -328,7 +328,7 @@ def showSummary(rwd,bias,covp,numLIST,oldALL,survivalTF):
   ALL.index = numLIST
 
   # Print out the dataframe
-  print('RWD goal < 0.5, BIAS goal < 5%, COVP < 95%')
+  print('RWD goal < 0.5, BIAS goal < 5%, COVP > 95%')
   print(ALL.transpose())
 
   # Set the dataframe to nan if appropriate entries do not meet COVP>=95% criteria  
